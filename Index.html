@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Atlante Stati Europei</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f7fa;
+      color: #222;
+    }
+
+    .layout {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      width: 280px;
+      background: #1f2937;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid #ccc;
+    }
+
+    .sidebar h1 {
+      font-size: 20px;
+      margin: 0;
+      padding: 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.15);
+    }
+
+    .menu {
+      overflow-y: auto;
+      padding: 10px;
+      flex: 1;
+    }
+
+    .menu button {
+      width: 100%;
+      text-align: left;
+      padding: 12px 14px;
+      margin-bottom: 8px;
+      border: none;
+      border-radius: 8px;
+      background: #374151;
+      color: white;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      font-size: 15px;
+    }
+
+    .menu button:hover {
+      background: #4b5563;
+    }
+
+    .menu button.active {
+      background: #2563eb;
+    }
+
+    .content {
+      flex: 1;
+      display: flex;
+      height: 100vh;
+    }
+
+    .description {
+      width: 50%;
+      padding: 30px;
+      overflow-y: auto;
+      background: #ffffff;
+      border-right: 1px solid #ddd;
+    }
+
+    .description h2 {
+      margin-top: 0;
+      font-size: 28px;
+    }
+
+    .description p {
+      line-height: 1.6;
+      font-size: 16px;
+      white-space: pre-line;
+    }
+
+    .viewer {
+      width: 50%;
+      padding: 20px;
+      background: #eef2f7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .viewer-frame {
+      width: 100%;
+      height: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      background: white;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      display: flex;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+      background: white;
+    }
+
+    @media (max-width: 1000px) {
+      .content {
+        flex-direction: column;
+      }
+
+      .description,
+      .viewer {
+        width: 100%;
+        height: 50%;
+      }
+
+      .sidebar {
+        width: 220px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <h1>Stati Europei</h1>
+      <div class="menu" id="menu"></div>
+    </aside>
+
+    <main class="content">
+      <section class="description">
+        <h2 id="country-title">Seleziona uno Stato</h2>
+        <p id="country-description">
+          Seleziona uno Stato dal menu a sinistra per visualizzare la descrizione e l'immagine.
+        </p>
+      </section>
+
+      <section class="viewer">
+        <div class="viewer-frame">
+          <iframe
+            id="country-frame"
+            src=""
+            title="Visualizzatore paese"
+            loading="eager">
+          </iframe>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const paesi = [
+      {
+        nome: "Austria",
+        file: "paesi/austria.html",
+        descrizione: "Qui puoi inserire la descrizione dell'Austria.\nAd esempio: posizione geografica, capitale, lingua, popolazione, curiosità storiche o culturali."
+      },
+      {
+        nome: "Belgio",
+        file: "paesi/belgio.html",
+        descrizione: "Qui puoi inserire la descrizione del Belgio."
+      },
+      {
+        nome: "Italia",
+        file: "paesi/italia.html",
+        descrizione: "Qui puoi inserire la descrizione dell'Italia."
+      },
+      {
+        nome: "Francia",
+        file: "paesi/francia.html",
+        descrizione: "Qui puoi inserire la descrizione della Francia."
+      },
+      {
+        nome: "Irlanda",
+        file: "paesi/irlanda.html",
+        descrizione: "Qui puoi inserire la descrizione dell'Irlanda."
+      },
+      {
+        nome: "Lussemburgo",
+        file: "paesi/lussemburgo.html",
+        descrizione: "Qui puoi inserire la descrizione del Lussemburgo."
+      },
+      {
+        nome: "Paesi Bassi",
+        file: "paesi/paesi-bassi.html",
+        descrizione: "Qui puoi inserire la descrizione dei Paesi Bassi."
+      },
+      {
+        nome: "Svizzera",
+        file: "paesi/svizzera.html",
+        descrizione: "Qui puoi inserire la descrizione della Svizzera."
+      },
+      {
+        nome: "Albania",
+        file: "paesi/albania.html",
+        descrizione: "Qui puoi inserire la descrizione dell'Albania."
+      },
+      {
+        nome: "Bosnia ed Erzegovina",
+        file: "paesi/bosnia-erzegovina.html",
+        descrizione: "Qui puoi inserire la descrizione della Bosnia ed Erzegovina."
+      },
+      {
+        nome: "Bulgaria",
+        file: "paesi/bulgaria.html",
+        descrizione: "Qui puoi inserire la descrizione della Bulgaria."
+      },
+      {
+        nome: "Cipro",
+        file: "paesi/cipro.html",
+        descrizione: "Qui puoi inserire la descrizione di Cipro."
+      },
+      {
+        nome: "Croazia",
+        file: "paesi/croazia.html",
+        descrizione: "Qui puoi inserire la descrizione della Croazia."
+      },
+      {
+        nome: "Grecia",
+        file: "paesi/grecia.html",
+        descrizione: "Qui puoi inserire la descrizione della Grecia."
+      },
+      {
+        nome: "Macedonia del Nord",
+        file: "paesi/macedonia-del-nord.html",
+        descrizione: "Qui puoi inserire la descrizione della Macedonia del Nord."
+      },
+      {
+        nome: "Malta",
+        file: "paesi/malta.html",
+        descrizione: "Qui puoi inserire la descrizione di Malta."
+      },
+      {
+        nome: "Montenegro",
+        file: "paesi/montenegro.html",
+        descrizione: "Qui puoi inserire la descrizione del Montenegro."
+      },
+      {
+        nome: "Portogallo",
+        file: "paesi/portogallo.html",
+        descrizione: "Qui puoi inserire la descrizione del Portogallo."
+      },
+      {
+        nome: "Serbia",
+        file: "paesi/serbia.html",
+        descrizione: "Qui puoi inserire la descrizione della Serbia."
+      },
+      {
+        nome: "Slovenia",
+        file: "paesi/slovenia.html",
+        descrizione: "Qui puoi inserire la descrizione della Slovenia."
+      },
+      {
+        nome: "Spagna",
+        file: "paesi/spagna.html",
+        descrizione: "Qui puoi inserire la descrizione della Spagna."
+      },
+      {
+        nome: "Danimarca",
+        file: "paesi/danimarca.html",
+        descrizione: "Qui puoi inserire la descrizione della Danimarca."
+      },
+      {
+        nome: "Estonia",
+        file: "paesi/estonia.html",
+        descrizione: "Qui puoi inserire la descrizione dell'Estonia."
+      },
+      {
+        nome: "Finlandia",
+        file: "paesi/finlandia.html",
+        descrizione: "Qui puoi inserire la descrizione della Finlandia."
+      },
+      {
+        nome: "Islanda",
+        file: "paesi/islanda.html",
+        descrizione: "Qui puoi inserire la descrizione dell'Islanda."
+      },
+      {
+        nome: "Lettonia",
+        file: "paesi/lettonia.html",
+        descrizione: "Qui puoi inserire la descrizione della Lettonia."
+      },
+      {
+        nome: "Lituania",
+        file: "paesi/lituania.html",
+        descrizione: "Qui puoi inserire la descrizione della Lituania."
+      },
+      {
+        nome: "Norvegia",
+        file: "paesi/norvegia.html",
+        descrizione: "Qui puoi inserire la descrizione della Norvegia."
+      },
+      {
+        nome: "Armenia",
+        file: "paesi/armenia.html",
+        descrizione: "Qui puoi inserire la descrizione dell'Armenia."
+      },
+      {
+        nome: "Azerbaigian",
+        file: "paesi/azerbaigian.html",
+        descrizione: "Qui puoi inserire la descrizione dell'Azerbaigian."
+      },
+      {
+        nome: "Bielorussia",
+        file: "paesi/bielorussia.html",
+        descrizione: "Qui puoi inserire la descrizione della Bielorussia."
+      },
+      {
+        nome: "Georgia",
+        file: "paesi/georgia.html",
+        descrizione: "Qui puoi inserire la descrizione della Georgia."
+      },
+      {
+        nome: "Germania",
+        file: "paesi/germania.html",
+        descrizione: "Qui puoi inserire la descrizione della Germania."
+      },
+      {
+        nome: "Moldavia",
+        file: "paesi/moldavia.html",
+        descrizione: "Qui puoi inserire la descrizione della Moldavia."
+      },
+      {
+        nome: "Polonia",
+        file: "paesi/polonia.html",
+        descrizione: "Qui puoi inserire la descrizione della Polonia."
+      },
+      {
+        nome: "Regno Unito",
+        file: "paesi/regno-unito.html",
+        descrizione: "Qui puoi inserire la descrizione del Regno Unito."
+      },
+      {
+        nome: "Repubblica Ceca",
+        file: "paesi/repubblica-ceca.html",
+        descrizione: "Qui puoi inserire la descrizione della Repubblica Ceca."
+      },
+      {
+        nome: "Romania",
+        file: "paesi/romania.html",
+        descrizione: "Qui puoi inserire la descrizione della Romania."
+      },
+      {
+        nome: "Russia",
+        file: "paesi/russia.html",
+        descrizione: "Qui puoi inserire la descrizione della Russia."
+      },
+      {
+        nome: "Slovacchia",
+        file: "paesi/slovacchia.html",
+        descrizione: "Qui puoi inserire la descrizione della Slovacchia."
+      },
+      {
+        nome: "Ucraina",
+        file: "paesi/ucraina.html",
+        descrizione: "Qui puoi inserire la descrizione dell'Ucraina."
+      },
+      {
+        nome: "Ungheria",
+        file: "paesi/ungheria.html",
+        descrizione: "Qui puoi inserire la descrizione dell'Ungheria."
+      },
+      {
+        nome: "Kazakistan",
+        file: "paesi/kazakistan.html",
+        descrizione: "Qui puoi inserire la descrizione del Kazakistan."
+      },
+      {
+        nome: "Turchia",
+        file: "paesi/turchia.html",
+        descrizione: "Qui puoi inserire la descrizione della Turchia."
+      }
+    ];
+
+    paesi.sort((a, b) => a.nome.localeCompare(b.nome, "it"));
+
+    const menu = document.getElementById("menu");
+    const title = document.getElementById("country-title");
+    const description = document.getElementById("country-description");
+    const frame = document.getElementById("country-frame");
+
+    function caricaPaese(paese, bottoneCliccato) {
+      title.textContent = paese.nome;
+      description.textContent = paese.descrizione;
+      frame.src = paese.file;
+      frame.title = "Visualizzatore " + paese.nome;
+
+      document.querySelectorAll(".menu button").forEach(btn => {
+        btn.classList.remove("active");
+      });
+
+      if (bottoneCliccato) {
+        bottoneCliccato.classList.add("active");
+      }
+    }
+
+    paesi.forEach((paese, index) => {
+      const button = document.createElement("button");
+      button.textContent = paese.nome;
+
+      if (index === 0) {
+        button.classList.add("active");
+      }
+
+      button.addEventListener("click", () => caricaPaese(paese, button));
+      menu.appendChild(button);
+    });
+
+    if (paesi.length > 0) {
+      title.textContent = paesi[0].nome;
+      description.textContent = paesi[0].descrizione;
+      frame.src = paesi[0].file;
+      frame.title = "Visualizzatore " + paesi[0].nome;
+    }
+  </script>
+</body>
+</html>
