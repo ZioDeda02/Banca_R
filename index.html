@@ -27,7 +27,6 @@
       display: flex;
       min-height: 100dvh;
       width: 100%;
-      overflow: hidden;
     }
 
     .sidebar {
@@ -80,86 +79,134 @@
 
     .content {
       flex: 1;
-      display: flex;
       min-width: 0;
-      min-height: 100dvh;
-    }
-
-    .description {
-      flex: 1 1 50%;
-      min-width: 0;
-      padding: 30px;
+      padding: 24px;
       overflow-y: auto;
-      background: #ffffff;
-      border-right: 1px solid #ddd;
+      background: #eef2f7;
     }
 
-    .description h2 {
-      margin-top: 0;
-      margin-bottom: 16px;
-      font-size: clamp(24px, 3vw, 32px);
+    .content-inner {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: minmax(320px, 420px) minmax(320px, 1fr);
+      gap: 24px;
+      align-items: stretch;
+    }
+
+    .description-panel,
+    .viewer-panel {
+      background: #ffffff;
+      border: 1px solid #dbe2ea;
+      border-radius: 14px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+
+    .description-panel {
+      display: flex;
+      flex-direction: column;
+      min-height: 520px;
+    }
+
+    .description-header,
+    .viewer-header {
+      padding: 18px 22px;
+      border-bottom: 1px solid #e5e7eb;
+      background: #f9fafb;
+    }
+
+    .description-header h2,
+    .viewer-header h3 {
+      margin: 0;
       line-height: 1.2;
+    }
+
+    .description-header h2 {
+      font-size: clamp(24px, 2.5vw, 30px);
       word-break: break-word;
     }
 
-    .description p {
-      line-height: 1.6;
-      font-size: clamp(15px, 1.6vw, 17px);
-      white-space: pre-line;
-      margin: 0;
+    .viewer-header h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #374151;
     }
 
-    .viewer {
-      flex: 1 1 50%;
-      min-width: 0;
-      padding: 20px;
+    .description-body {
+      padding: 24px 22px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .description-body p {
+      margin: 0;
+      line-height: 1.7;
+      font-size: clamp(15px, 1.4vw, 17px);
+      white-space: pre-line;
+    }
+
+    .viewer-panel {
+      display: flex;
+      flex-direction: column;
+      min-height: 520px;
+    }
+
+    .viewer-body {
+      flex: 1;
+      padding: 16px;
       background: #eef2f7;
       display: flex;
-      align-items: center;
-      justify-content: center;
     }
 
     .viewer-frame {
       width: 100%;
-      height: 100%;
-      min-height: 420px;
+      min-height: 440px;
+      background: white;
       border: 1px solid #cbd5e1;
       border-radius: 12px;
-      background: white;
       overflow: hidden;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
       display: flex;
     }
 
     iframe {
       width: 100%;
       height: 100%;
-      min-height: 420px;
+      min-height: 440px;
       border: none;
       display: block;
       background: white;
       flex: 1;
     }
 
-    @media (max-width: 1100px) {
+    @media (max-width: 1200px) {
       .sidebar {
         width: 240px;
         min-width: 210px;
       }
 
-      .description {
-        padding: 24px;
+      .content {
+        padding: 18px;
       }
 
-      .viewer {
-        padding: 16px;
+      .content-inner {
+        grid-template-columns: minmax(280px, 380px) minmax(320px, 1fr);
+        gap: 18px;
+      }
+
+      .description-body {
+        padding: 20px;
+      }
+
+      .viewer-body {
+        padding: 14px;
       }
     }
 
     @media (max-width: 900px) {
       .layout {
         flex-direction: column;
-        overflow: auto;
       }
 
       .sidebar {
@@ -175,29 +222,23 @@
       }
 
       .menu {
-        max-height: 220px;
+        max-height: 190px;
         padding: 8px;
       }
 
       .content {
-        flex-direction: column;
+        padding: 14px;
+      }
+
+      .content-inner {
+        grid-template-columns: 1fr;
+        max-width: 760px;
+        gap: 16px;
+      }
+
+      .description-panel,
+      .viewer-panel {
         min-height: auto;
-      }
-
-      .description,
-      .viewer {
-        width: 100%;
-        flex: none;
-      }
-
-      .description {
-        border-right: none;
-        border-bottom: 1px solid #ddd;
-        padding: 20px 16px;
-      }
-
-      .viewer {
-        padding: 12px;
       }
 
       .viewer-frame,
@@ -207,14 +248,8 @@
     }
 
     @media (max-width: 600px) {
-      .sidebar h1 {
-        font-size: 17px;
-        padding: 14px 16px;
-      }
-
       .menu {
-        max-height: 170px;
-        padding: 8px;
+        max-height: 160px;
       }
 
       .menu button {
@@ -223,47 +258,48 @@
         font-size: 14px;
       }
 
-      .description {
-        padding: 18px 16px;
-      }
-
-      .description h2 {
-        font-size: 22px;
-        margin-bottom: 12px;
-      }
-
-      .description p {
-        font-size: 15px;
-        line-height: 1.5;
-      }
-
-      .viewer {
+      .content {
         padding: 10px;
-        background: #eef2f7;
+      }
+
+      .description-header,
+      .viewer-header {
+        padding: 14px 16px;
+      }
+
+      .description-header h2 {
+        font-size: 22px;
+      }
+
+      .viewer-header h3 {
+        font-size: 16px;
+      }
+
+      .description-body {
+        padding: 16px;
+      }
+
+      .description-body p {
+        font-size: 15px;
+        line-height: 1.6;
+      }
+
+      .viewer-body {
+        padding: 10px;
       }
 
       .viewer-frame {
         min-height: 260px;
-        height: 48dvh;
-        max-height: 420px;
-        border-radius: 10px;
       }
 
       iframe {
         min-height: 260px;
-        height: 100%;
       }
     }
 
     @media (max-width: 420px) {
-      .menu {
-        max-height: 150px;
-      }
-
       .viewer-frame {
         min-height: 220px;
-        height: 42dvh;
-        max-height: 360px;
       }
 
       iframe {
@@ -280,23 +316,34 @@
     </aside>
 
     <main class="content">
-      <section class="description">
-        <h2 id="country-title">Seleziona uno Stato</h2>
-        <p id="country-description">
-          Seleziona uno Stato dal menu a sinistra per visualizzare la descrizione e l'immagine.
-        </p>
-      </section>
+      <div class="content-inner">
+        <section class="description-panel">
+          <div class="description-header">
+            <h2 id="country-title">Seleziona uno Stato</h2>
+          </div>
+          <div class="description-body">
+            <p id="country-description">
+              Seleziona uno Stato dal menu a sinistra per visualizzare la descrizione e l'immagine.
+            </p>
+          </div>
+        </section>
 
-      <section class="viewer">
-        <div class="viewer-frame">
-          <iframe
-            id="country-frame"
-            src=""
-            title="Visualizzatore paese"
-            loading="eager">
-          </iframe>
-        </div>
-      </section>
+        <section class="viewer-panel">
+          <div class="viewer-header">
+            <h3>Immagine del Paese</h3>
+          </div>
+          <div class="viewer-body">
+            <div class="viewer-frame">
+              <iframe
+                id="country-frame"
+                src=""
+                title="Visualizzatore paese"
+                loading="eager">
+              </iframe>
+            </div>
+          </div>
+        </section>
+      </div>
     </main>
   </div>
 
