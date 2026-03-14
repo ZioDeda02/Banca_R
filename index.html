@@ -130,9 +130,23 @@ body{
 
 .description-preview{
   margin:0 0 14px 0;
-  line-height:1.7;
   font-size:16px;
-  white-space:pre-line;
+  line-height:1.7;
+  max-height:calc(1.7em * 3);
+  overflow:hidden;
+  position:relative;
+  word-break:break-word;
+}
+
+.description-preview.clamped::after{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  height:1.8em;
+  background:linear-gradient(to bottom, rgba(255,255,255,0), #ffffff 85%);
+  pointer-events:none;
 }
 
 .show-more-button{
@@ -361,6 +375,7 @@ body{
   .description-preview{
     font-size:15px;
     line-height:1.6;
+    max-height:calc(1.6em * 3);
   }
 
   .show-more-button{
@@ -426,9 +441,9 @@ body{
         </div>
 
         <div class="description-body">
-          <p id="country-description-preview" class="description-preview">
+          <div id="country-description-preview" class="description-preview">
             Seleziona uno Stato dal menu a sinistra per visualizzare la descrizione e l'immagine.
-          </p>
+          </div>
 
           <button id="show-more-description" class="show-more-button" type="button" style="display:none;">
             Mostra di più
@@ -542,6 +557,19 @@ function showError(message){
   viewer.innerHTML = `<div class="viewer-error">${message}</div>`;
 }
 
+function escapeHtml(text){
+  return text
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function convertTextToHtml(text){
+  return escapeHtml(text).replace(/\n/g, "<br>");
+}
+
 function extractVisualFromHtml(htmlText){
   const parser = new DOMParser();
   const doc = parser.parseFromString(htmlText,"text/html");
@@ -580,29 +608,6 @@ async function caricaImmagineDaFile(filePath){
   }
 }
 
-function createDescriptionPreview(text, maxLength = 140){
-  const cleanText = (text || "").trim();
-
-  if(cleanText.length <= maxLength){
-    return {
-      preview: cleanText,
-      truncated: false
-    };
-  }
-
-  let shortText = cleanText.slice(0, maxLength);
-  const lastSpace = shortText.lastIndexOf(" ");
-
-  if(lastSpace > 0){
-    shortText = shortText.slice(0, lastSpace);
-  }
-
-  return {
-    preview: shortText + "...",
-    truncated: true
-  };
-}
-
 function openDescriptionModal(){
   if(!paeseSelezionato) return;
 
@@ -618,14 +623,19 @@ function closeDescriptionModalFn(){
 }
 
 function aggiornaDescrizione(paese){
-  const result = createDescriptionPreview(paese.descrizione, 140);
-  descriptionPreview.textContent = result.preview;
+  descriptionPreview.innerHTML = convertTextToHtml(paese.descrizione);
+  descriptionPreview.classList.remove("clamped");
 
-  if(result.truncated){
-    showMoreButton.style.display = "inline-block";
-  } else {
-    showMoreButton.style.display = "none";
-  }
+  requestAnimationFrame(() => {
+    const isOverflowing = descriptionPreview.scrollHeight > descriptionPreview.clientHeight + 1;
+
+    if(isOverflowing){
+      descriptionPreview.classList.add("clamped");
+      showMoreButton.style.display = "inline-block";
+    } else {
+      showMoreButton.style.display = "none";
+    }
+  });
 }
 
 function caricaPaese(paese,button){
@@ -667,6 +677,12 @@ descriptionModal.addEventListener("click", (event) => {
 document.addEventListener("keydown", (event) => {
   if(event.key === "Escape" && descriptionModal.classList.contains("open")){
     closeDescriptionModalFn();
+  }
+});
+
+window.addEventListener("resize", () => {
+  if(paeseSelezionato){
+    aggiornaDescrizione(paeseSelezionato);
   }
 });
 
