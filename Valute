@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Atlante Valute Europee</title>
+
+<style>
+*{
+  box-sizing:border-box;
+}
+
+html,body{
+  margin:0;
+  padding:0;
+  min-height:100%;
+  font-family:Arial,sans-serif;
+  background:#f4f8f6;
+  color:#1f2937;
+}
+
+body{
+  min-height:100dvh;
+}
+
+.layout{
+  display:flex;
+  height:100dvh;
+  width:100%;
+  overflow:hidden;
+}
+
+.sidebar{
+  width:280px;
+  min-width:220px;
+  height:100dvh;
+  background:#134e4a;
+  color:white;
+  display:flex;
+  flex-direction:column;
+  border-right:1px solid #b7d4cf;
+  flex-shrink:0;
+  overflow:hidden;
+}
+
+.sidebar h1{
+  font-size:20px;
+  margin:0;
+  padding:20px;
+  border-bottom:1px solid rgba(255,255,255,0.15);
+  line-height:1.3;
+  flex-shrink:0;
+}
+
+.menu{
+  overflow-y:auto;
+  overflow-x:hidden;
+  padding:10px;
+  flex:1;
+  min-height:0;
+}
+
+.menu button{
+  width:100%;
+  text-align:left;
+  padding:12px 14px;
+  margin-bottom:8px;
+  border:none;
+  border-radius:8px;
+  background:#0f766e;
+  color:white;
+  cursor:pointer;
+  transition:background 0.2s ease;
+  font-size:15px;
+  line-height:1.35;
+}
+
+.menu button:hover{
+  background:#115e59;
+}
+
+.menu button.active{
+  background:#10b981;
+}
+
+.content{
+  flex:1;
+  min-width:0;
+  height:100dvh;
+  padding:20px;
+  overflow-y:auto;
+  background:#eaf6f2;
+}
+
+.content-inner{
+  width:100%;
+  max-width:1280px;
+  margin:0 auto;
+  display:grid;
+  grid-template-columns:minmax(320px,430px) minmax(320px,1fr);
+  gap:20px;
+  align-items:start;
+}
+
+.description-panel,
+.viewer-panel{
+  background:#ffffff;
+  border:1px solid #cfe5df;
+  border-radius:14px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.08);
+  overflow:hidden;
+}
+
+.description-header,
+.viewer-header{
+  padding:18px 22px;
+  border-bottom:1px solid #dbe7e3;
+  background:#f7fcfa;
+}
+
+.description-header h2,
+.viewer-header h3{
+  margin:0;
+  line-height:1.2;
+}
+
+.description-body{
+  padding:22px;
+}
+
+.description-preview{
+  margin:0 0 14px 0;
+  font-size:16px;
+  line-height:1.7;
+  max-height:calc(1.7em * 3);
+  overflow:hidden;
+  position:relative;
+  word-break:break-word;
+}
+
+.description-preview.clamped::after{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  height:1.8em;
+  background:linear-gradient(to bottom, rgba(255,255,255,0), #ffffff 85%);
+  pointer-events:none;
+}
+
+.show-more-button{
+  display:inline-block;
+  margin:0 0 20px 0;
+  padding:0;
+  border:none;
+  background:none;
+  color:#0f766e;
+  font-size:15px;
+  font-weight:600;
+  cursor:pointer;
+  text-decoration:underline;
+}
+
+.show-more-button:hover{
+  color:#115e59;
+}
+
+.next-page-button{
+  display:inline-block;
+  padding:12px 18px;
+  border:none;
+  border-radius:10px;
+  background:#10b981;
+  color:#fff;
+  font-size:15px;
+  font-weight:600;
+  cursor:pointer;
+  transition:background 0.2s ease, transform 0.1s ease;
+}
+
+.next-page-button:hover{
+  background:#059669;
+}
+
+.next-page-button:active{
+  transform:translateY(1px);
+}
+
+.viewer-body{
+  padding:14px;
+  background:#eaf6f2;
+}
+
+.viewer-frame{
+  width:100%;
+  height:clamp(320px,62vh,760px);
+  border:1px solid #bdd8d1;
+  border-radius:12px;
+  overflow:hidden;
+  background:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.viewer-content{
+  width:100%;
+  height:100%;
+  padding:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  background:#ffffff;
+}
+
+.viewer-content img,
+.viewer-content svg{
+  max-width:100%;
+  max-height:100%;
+  width:auto;
+  height:auto;
+  display:block;
+  object-fit:contain;
+}
+
+.viewer-placeholder,
+.viewer-error{
+  color:#4b5563;
+  text-align:center;
+  font-size:15px;
+  line-height:1.5;
+  padding:20px;
+}
+
+/* MODALE DESCRIZIONE */
+.modal-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(15,23,42,0.55);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  z-index:9999;
+}
+
+.modal-overlay.open{
+  display:flex;
+}
+
+.modal-box{
+  width:min(720px, 100%);
+  max-height:min(80dvh, 900px);
+  background:#ffffff;
+  border-radius:16px;
+  box-shadow:0 20px 50px rgba(0,0,0,0.25);
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+}
+
+.modal-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  padding:18px 20px;
+  border-bottom:1px solid #dbe7e3;
+  background:#f7fcfa;
+}
+
+.modal-header h3{
+  margin:0;
+  font-size:22px;
+  line-height:1.2;
+}
+
+.modal-close{
+  border:none;
+  background:#d1fae5;
+  color:#064e3b;
+  width:38px;
+  height:38px;
+  border-radius:10px;
+  font-size:22px;
+  line-height:1;
+  cursor:pointer;
+  flex-shrink:0;
+}
+
+.modal-close:hover{
+  background:#a7f3d0;
+}
+
+.modal-body{
+  padding:20px;
+  overflow-y:auto;
+}
+
+.modal-body p{
+  margin:0;
+  font-size:16px;
+  line-height:1.8;
+  white-space:pre-line;
+}
+
+/* MOBILE */
+@media(max-width:980px){
+  .layout{
+    flex-direction:column;
+    height:auto;
+    min-height:100dvh;
+    overflow:visible;
+  }
+
+  .sidebar{
+    width:100%;
+    min-width:100%;
+    height:auto;
+    border-right:none;
+    border-bottom:1px solid #b7d4cf;
+    overflow:visible;
+  }
+
+  .menu{
+    max-height:180px;
+  }
+
+  .content{
+    height:auto;
+    overflow-y:visible;
+  }
+
+  .content-inner{
+    grid-template-columns:1fr;
+  }
+
+  .viewer-frame{
+    height:clamp(260px,48vh,520px);
+  }
+}
+
+@media(max-width:600px){
+  .content{
+    padding:10px;
+  }
+
+  .sidebar h1{
+    padding:14px 16px;
+    font-size:18px;
+  }
+
+  .menu{
+    max-height:150px;
+    padding:8px;
+  }
+
+  .menu button{
+    padding:10px 12px;
+    margin-bottom:6px;
+    font-size:14px;
+  }
+
+  .description-header,
+  .viewer-header{
+    padding:14px 16px;
+  }
+
+  .description-body{
+    padding:16px;
+  }
+
+  .description-preview{
+    font-size:15px;
+    line-height:1.6;
+    max-height:calc(1.6em * 3);
+  }
+
+  .show-more-button{
+    font-size:14px;
+  }
+
+  .next-page-button{
+    width:100%;
+    text-align:center;
+  }
+
+  .viewer-body{
+    padding:10px;
+  }
+
+  .viewer-frame{
+    height:clamp(220px,42vh,420px);
+  }
+
+  .viewer-content{
+    padding:8px;
+  }
+
+  .modal-overlay{
+    padding:12px;
+  }
+
+  .modal-header{
+    padding:14px 16px;
+  }
+
+  .modal-header h3{
+    font-size:20px;
+  }
+
+  .modal-body{
+    padding:16px;
+  }
+
+  .modal-body p{
+    font-size:15px;
+    line-height:1.7;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="layout">
+
+  <aside class="sidebar">
+    <h1>Valute Europee</h1>
+    <div class="menu" id="menu"></div>
+  </aside>
+
+  <main class="content">
+    <div class="content-inner">
+
+      <section class="description-panel">
+        <div class="description-header">
+          <h2 id="currency-title">Seleziona una Valuta</h2>
+        </div>
+
+        <div class="description-body">
+          <div id="currency-description-preview" class="description-preview">
+            Seleziona una valuta dal menu a sinistra per visualizzare la descrizione e l'immagine.
+          </div>
+
+          <button id="show-more-description" class="show-more-button" type="button" style="display:none;">
+            Mostra di più
+          </button>
+
+          <br>
+
+          <button id="go-to-paesi" class="next-page-button" type="button">
+            Vai a Paesi
+          </button>
+        </div>
+      </section>
+
+      <section class="viewer-panel">
+        <div class="viewer-header">
+          <h3>Immagine della Valuta</h3>
+        </div>
+
+        <div class="viewer-body">
+          <div class="viewer-frame">
+            <div id="currency-viewer" class="viewer-content">
+              <div class="viewer-placeholder">Seleziona una valuta.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+</div>
+
+<!-- MODALE -->
+<div id="description-modal" class="modal-overlay" aria-hidden="true">
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modal-currency-title">
+    <div class="modal-header">
+      <h3 id="modal-currency-title">Descrizione completa</h3>
+      <button id="close-description-modal" class="modal-close" type="button" aria-label="Chiudi">×</button>
+    </div>
+    <div class="modal-body">
+      <p id="modal-currency-description"></p>
+    </div>
+  </div>
+</div>
+
+<script>
+const valute = [
+  {nome:"ALL (Lek albanese)",file:"Valute/all-lek-albanese.html",descrizione:"ALL (Lek albanese)\n💠 Simbolo\nL\n🏷 Categoria\nMoneta europea moderna\n💰 Valore base\n0.0096\n📈 Inflazione media\n~+2.5%/g\n🌀 Oscillazione\n±1.3%\n✅ Vantaggi\n+7% commercio diretto\n+5% flessibilità di mercato\n+4% scambi utenti\n❌ Svantaggi\nvalore basso\nmercato limitato\n📜 Descrizione\nValuta leggera e flessibile, utile per economie piccole e dinamiche.\n🎮 Strategia consigliata\nOttima per scambi rapidi e commercio locale."},
+  {nome:"AMD (Dram armeno)",file:"Valute/amd-dram-armeno.html",descrizione:"AMD (Dram armeno)\n💠 Simbolo\n֏\n🏷 Categoria\nMoneta europea moderna\n💰 Valore base\n0.0023\n📈 Inflazione media\n~+2.5%/g\n🌀 Oscillazione\n±1.4%\n✅ Vantaggi\n+6% tecnologia emergente\n+5% trading digitale\n+4% velocità transazioni\n❌ Svantaggi\nvalore molto basso\nmercato piccolo\n📜 Descrizione\nValuta adatta a economie tecnologiche piccole ma flessibili.\n🎮 Strategia consigliata\nBuona per build digitali e rapide."},
+  {nome:"AZN (Manat azero)",file:"Valute/azn-manat-azero.html",descrizione:"AZN (Manat azero)\n💠 Simbolo\n₼\n🏷 Categoria\nMoneta europea moderna\n💰 Valore base\n0.55\n📈 Inflazione media\n~+2.4%/g\n🌀 Oscillazione\n±1.0%\n✅ Vantaggi\n+7% energia\n+5% investimenti\n+4% rendite da risorse\n❌ Svantaggi\neconomia poco diversificata\n+4% dipendenza energetica\n📜 Descrizione\nValuta forte nei settori legati a petrolio e gas, meno flessibile altrove.\n🎮 Strategia consigliata\nOttima per build energetiche e beni a rendita."},
+  {nome:"BAM (Marco convertibile)",file:"Valute/bam-marco-convertibile.html",descrizione:"BAM (Marco convertibile)\n💠 Simbolo\nKM\n🏷 Categoria\nMoneta europea moderna\n💰 Valore base\n0.51\n📈 Inflazione media\n~+2.1%/g\n🌀 Oscillazione\n±0.8%\n✅ Vantaggi\n+6% stabilità commerciale\n+5% industria leggera\n+4% trasformazioni\n❌ Svantaggi\nmercato piccolo\ncrescita moderata\n📜 Descrizione\nValuta ordinata e piuttosto stabile, adatta a economie piccole ma produttive.\n🎮 Strategia consigliata\nOttima per trasformazioni e crescita regolare."},
+  {nome:"BGN (Lev bulgaro)",file:"Valute/bgn-lev-bulgaro.html",descrizione:"BGN (Lev bulgaro)\n💠 Simbolo\nлв\n🏷 Categoria\nMoneta europea moderna\n💰 Valore base\n0.51\n📈 Inflazione media\n~+2.2%/g\n🌀 Oscillazione\n±0.8%\n✅ Vantaggi\n+6% agricoltura\n+5% oggetti base\n+4% stabilità commerciale\n❌ Svantaggi\nmercato piccolo\n-3% trading speculativo\n📜 Descrizione\nValuta utile per economie agricole o miste, con discreta stabilità interna.\n🎮 Strategia consigliata\nBuona per produzione alimentare e mercati base."},
+  {nome:"BYN (Rublo bielorusso)",file:"Valute/byn-rublo-bielorusso.html",descrizione:"BYN (Rublo bielorusso)\n💠 Simbolo\nBr\n🏷 Categoria\nMoneta europea moderna\n💰 Valore base\n0.31\n📈 Inflazione media\n~+2.6%/g\n🌀 Oscillazione\n±1.3%\n✅ Vantaggi\n+6% industria\n+5% trasformazioni\n+4% produzione pesante\n❌ Svantaggi\n-5% commercio internazionale\n+5% volatilità economica\n📜 Descrizione\nValuta orientata alla produzione, meno adatta ai mercati globali.\n🎮 Strategia consigliata\nOttima per build industriali chiuse o interne."},
+  {nome:"CHF (Franco svizzero)",file:"Valute/chf-franco-svizzero.html",descrizione:"CHF (Franco svizzero)\n💠 Simbolo\nCHF\n🏷 Categoria\nMoneta europea moderna\n💰 Valore base\n1.05\n📈 Inflazione media\n~+1.6%/g\n🌀 Oscillazione\n±0.4%\n✅ Vantaggi\n+10% stabilità monetaria\n+8% fiducia bancaria\n+5% investimenti sicuri\n❌ Svantaggi\ncrescita lenta\n-3% profitti speculativi\n📜 Descrizione\nValuta molto solida e affidabile, pensata per economie prudenti e patrimoniali.\n🎮 Strategia consigliata\nPerfetta per capitale, banca centrale e gestione a lungo termine."},
+  {nome:"CZK (Corona ceca)",file:"Valute/czk-corona-ceca.html",descrizione:"CZK (Corona ceca)\n💠 Simbolo\nKč\n🏷 Categoria\nMoneta europea moderna\n💰 Valore base\n0.041\n📈 Inflazione media\n~+2.1%/g\n🌀 Oscillazione\n±0.9%\n✅ Vantaggi\n+6% industria\n+5% trasformazioni\n+4% competitività prezzi\n❌ Svantaggi\nvalore basso\n+3% volatilità moderata\n📜 Descrizione\nValuta utile per economie produttive e industriali con buon rapporto tra costo e rendimento.\n🎮 Strategia consigliata\nPerfetta per produzione, industria e trasformazioni."},
+  {nome:"DKK (Corona danese)",file:"Valute/dkk-corona-danese.html",descrizione:"DKK (Corona danese)\n💠 Simbolo\nkr\n🏷 Categoria\nMoneta europea moderna\n💰 Valore base\n0.13\n📈 Inflazione media\n~+1.9%/g\n🌀 Oscillazione\n±0.6%\n✅ Vantaggi\n+6% stabilità economica\n+5% efficienza commercio\n+4% gestione energetica\n❌ Svantaggi\nmercato meno aggressivo\nvalore medio-basso\n📜 Descrizione\nValuta stabile e ordinata, adatta a economie piccole ma efficienti.\n🎮 Strategia consigliata\nBuona per stati stabili, logistici o energetici."},
+  {nome:"EUR (Euro)",file:"Valute/eur-euro.html",descrizione:"EUR (Euro)\n💠 Simbolo\n€\n🏷 Categoria\nMoneta europea moderna\n💰 Valore base\n1.00\n📈 Inflazione media\n~+2.0%/g\n🌀 Oscillazione\n±0.5%\n✅ Vantaggi\n+8% fiducia economica\n+6% stabilità prezzi\n+5% commercio interstatale\n❌ Svantaggi\ncrescita moderata\npochi picchi speculativi\n📜 Descrizione\nValuta equilibrata e stabile, ideale per economie sviluppate e commercio regolare.\n🎮 Strategia consigliata\nPerfetta per build bilanciate e stati commerciali o industriali."},
+  {nome:"GBP (Sterlina)",file:"Valute/gbp-sterlina.html",descrizione:"GBP (Sterlina)\n💠 Simbolo\n£\n🏷 Categoria\nMoneta europea moderna\n💰 Valore base\n1.17\n📈 Inflazione media\n~+2.0%/g\n🌀 Oscillazione\n±0.9%\n✅ Vantaggi\n+7% trading finanziario\n+5% valore monetario\n+4% prestigio economico\n❌ Svantaggi\n+4% volatilità mercato\ncosto beni leggermente più alto\n📜 Descrizione\nValuta forte e prestigiosa, ottima per finanza e operazioni speculative.\n🎮 Strategia consigliata\nIdeale per stati finanziari e giocatori orientati al trading."},
+  {nome:"GEL (Lari georgiano)",file:"Valute/gel-lari-georgiano.html",descrizione:"GEL (Lari georgiano)\n💠 Simbolo\n₾\n🏷 Categoria\nMoneta europea moderna\n💰 Valore base\n0.35\n📈 Inflazione media\n~+2.4%/g\n🌀 Oscillazione\n±1.1%\n✅ Vantaggi\n+6% commercio regionale\n+5% logistica\n+4% scambi utenti\n❌ Svantaggi\nmercato piccolo\nstabilità economica moderata\n📜 Descrizione\nValuta adatta a commercio, collegamenti regionali e mercati dinamici.\n🎮 Strategia consigliata\nBuona per commercio e mobilità economica."},
+  {nome:"HUF (Fiorino ungherese)",file:"Valute/huf-fiorino-ungherese.html",descrizione:"HUF (Fiorino ungherese)\n💠 Simbolo\nFt\n🏷 Categoria\nMoneta europea moderna\n💰 Valore base\n0.0025\n📈 Inflazione media\n~+2.4%/g\n🌀 Oscillazione\n±1.2%\n✅ Vantaggi\n+6% produzione\n+5% flessibilità economica\n+4% vantaggio competitivo nei costi\n❌ Svantaggi\nvalore molto basso\n+5% sensibilità all’inflazione\n📜 Descrizione\nValuta più debole ma utile per economie che puntano su costo basso e crescita industriale.\n🎮 Strategia consigliata\nBuona per build rischiose ma produttive."},
+  {nome:"ISK (Corona islandese)",file:"Valute/isk-corona-islandese.html",descrizione:"ISK (Corona islandese)\n💠 Simbolo\nkr\n🏷 Categoria\nMoneta europea moderna\n💰 Valore base\n0.0072\n📈 Inflazione media\n~+2.2%/g\n🌀 Oscillazione\n±1.0%\n✅ Vantaggi\n+7% energia naturale\n+5% risorse locali\n+4% beni permanenti\n❌ Svantaggi\nmercato molto piccolo\n+4% volatilità esterna\n📜 Descrizione\nValuta di nicchia, utile per economie energetiche e naturali ma con poco mercato interno.\n🎮 Strategia consigliata\nBuona per energia e strategie specializzate."},
+  {nome:"KZT (Tenge kazako)",file:"Valute/kzt-tenge-kazako.html",descrizione:"KZT (Tenge kazako)\n💠 Simbolo\n₸\n🏷 Categoria\nMoneta europea moderna\n💰 Valore base\n0.002\n📈 Inflazione media\n~+2.6%/g\n🌀 Oscillazione\n±1.5%\n✅ Vantaggi\n+8% risorse naturali\n+6% energia\n+4% beni permanenti\n❌ Svantaggi\nvalore basso\nmercato volatile\n📜 Descrizione\nValuta legata a risorse e materie prime, con buona resa ma più rischio.\n🎮 Strategia consigliata\nPerfetta per build su energia e risorse naturali."},
+  {nome:"MDL (Leu moldavo)",file:"Valute/mdl-leu-moldavo.html",descrizione:"MDL (Leu moldavo)\n💠 Simbolo\nL\n🏷 Categoria\nMoneta europea moderna\n💰 Valore base\n0.051\n📈 Inflazione media\n~+2.5%/g\n🌀 Oscillazione\n±1.2%\n✅ Vantaggi\n+7% produzione alimentare\n+5% costo basso degli oggetti base\n+4% agricoltura\n❌ Svantaggi\nmercato piccolo\n-5% industria\n📜 Descrizione\nValuta adatta a economie agricole, con prezzi contenuti e rendimenti sui beni base.\n🎮 Strategia consigliata\nPerfetta per alimentari e crescita semplice."},
+  {nome:"MKD (Denaro macedone)",file:"Valute/mkd-denaro-macedone.html",descrizione:"MKD (Denaro macedone)\n💠 Simbolo\nден\n🏷 Categoria\nMoneta europea moderna\n💰 Valore base\n0.016\n📈 Inflazione media\n~+2.4%/g\n🌀 Oscillazione\n±1.1%\n✅ Vantaggi\n+6% produzione oggetti\n+5% industria emergente\n+4% flessibilità commerciale\n❌ Svantaggi\nmercato molto piccolo\n-4% commercio internazionale\n📜 Descrizione\nValuta utile per economie piccole e produttive, ma meno forti negli scambi globali.\n🎮 Strategia consigliata\nAdatta a build locali e manifatturiere."},
+  {nome:"NOK (Corona norvegese)",file:"Valute/nok-corona-norvegese.html",descrizione:"NOK (Corona norvegese)\n💠 Simbolo\nkr\n🏷 Categoria\nMoneta europea moderna\n💰 Valore base\n0.085\n📈 Inflazione media\n~+1.8%/g\n🌀 Oscillazione\n±0.8%\n✅ Vantaggi\n+7% settore energetico\n+5% rendite da risorse\n+4% banca centrale\n❌ Svantaggi\nmercato piccolo\n+3% costo beni importati\n📜 Descrizione\nValuta legata a un’economia energetica forte ma con un mercato interno ridotto.\n🎮 Strategia consigliata\nOttima per stati ricchi di energia e investimenti a lungo termine."},
+  {nome:"PLN (Złoty polacco)",file:"Valute/pln-zloty-polacco.html",descrizione:"PLN (Złoty polacco)\n💠 Simbolo\nzł\n🏷 Categoria\nMoneta europea moderna\n💰 Valore base\n0.23\n📈 Inflazione media\n~+2.2%/g\n🌀 Oscillazione\n±1.0%\n✅ Vantaggi\n+7% industria emergente\n+5% commercio regionale\n+4% competitività del lavoro\n❌ Svantaggi\n+4% inflazione nei periodi di crescita\nmercato competitivo\n📜 Descrizione\nValuta dinamica e utile per economie emergenti in forte sviluppo produttivo.\n🎮 Strategia consigliata\nOttima per stati industriali e crescita economica rapida."},
+  {nome:"RON (Leu rumeno)",file:"Valute/ron-leu-rumeno.html",descrizione:"RON (Leu rumeno)\n💠 Simbolo\nlei\n🏷 Categoria\nMoneta europea moderna\n💰 Valore base\n0.20\n📈 Inflazione media\n~+2.3%/g\n🌀 Oscillazione\n±1.0%\n✅ Vantaggi\n+6% tecnologia emergente\n+5% industria\n+4% crescita interna\n❌ Svantaggi\n+4% inflazione variabile\nmercato meno stabile\n📜 Descrizione\nValuta bilanciata per economie in crescita tecnologica e industriale.\n🎮 Strategia consigliata\nOttima per stati emergenti con sviluppo misto."},
+  {nome:"RSD (Dinaro serbo)",file:"Valute/rsd-dinaro-serbo.html",descrizione:"RSD (Dinaro serbo)\n💠 Simbolo\nдин.\n🏷 Categoria\nMoneta europea moderna\n💰 Valore base\n0.0085\n📈 Inflazione media\n~+2.4%/g\n🌀 Oscillazione\n±1.1%\n✅ Vantaggi\n+6% commercio regionale\n+5% industria emergente\n+4% competitività costi\n❌ Svantaggi\nvalore basso\n+4% volatilità moderata\n📜 Descrizione\nValuta adatta a economie regionali orientate alla produzione e al commercio di prossimità.\n🎮 Strategia consigliata\nBuona per build industriali emergenti."},
+  {nome:"RUB (Rublo russo)",file:"Valute/rub-rublo-russo.html",descrizione:"RUB (Rublo russo)\n💠 Simbolo\n₽\n🏷 Categoria\nMoneta europea moderna\n💰 Valore base\n0.011\n📈 Inflazione media\n~+2.8%/g\n🌀 Oscillazione\n±1.7%\n✅ Vantaggi\n+8% energia\n+6% industria pesante\n+5% beni permanenti\n❌ Svantaggi\n+6% volatilità economica\n-4% commercio internazionale\n📜 Descrizione\nValuta forte nei settori energetici e industriali, ma meno stabile nei mercati esterni.\n🎮 Strategia consigliata\nPerfetta per build energetiche e industriali."},
+  {nome:"SEK (Corona svedese)",file:"Valute/sek-corona-svedese.html",descrizione:"SEK (Corona svedese)\n💠 Simbolo\nkr\n🏷 Categoria\nMoneta europea moderna\n💰 Valore base\n0.086\n📈 Inflazione media\n~+1.9%/g\n🌀 Oscillazione\n±0.7%\n✅ Vantaggi\n+6% innovazione\n+5% stabilità prezzi\n+4% commercio avanzato\n❌ Svantaggi\nvalore medio-basso\ncrescita moderata\n📜 Descrizione\nValuta moderna e stabile, adatta a economie innovative e ben organizzate.\n🎮 Strategia consigliata\nOttima per build tecnologiche e prudenti."},
+  {nome:"TRY (Lira turca)",file:"Valute/try-lira-turca.html",descrizione:"TRY (Lira turca)\n💠 Simbolo\n₺\n🏷 Categoria\nMoneta europea moderna\n💰 Valore base\n0.029\n📈 Inflazione media\n~+3.0%/g\n🌀 Oscillazione\n±1.8%\n✅ Vantaggi\n+8% commercio aggressivo\n+6% industria\n+5% produzione oggetti\n❌ Svantaggi\n+8% inflazione\n+6% volatilità mercato\n📜 Descrizione\nValuta dinamica e rischiosa, adatta a economie veloci ma meno stabili.\n🎮 Strategia consigliata\nOttima per chi vuole crescita rapida con più rischio."},
+  {nome:"UAH (Grivnia)",file:"Valute/uah-grivnia.html",descrizione:"UAH (Grivnia)\n💠 Simbolo\n₴\n🏷 Categoria\nMoneta europea moderna\n💰 Valore base\n0.024\n📈 Inflazione media\n~+2.7%/g\n🌀 Oscillazione\n±1.5%\n✅ Vantaggi\n+8% agricoltura\n+6% risorse naturali\n+5% industria pesante\n❌ Svantaggi\n+6% volatilità monetaria\nstabilità inferiore alla media\n📜 Descrizione\nValuta più rischiosa ma adatta a economie grandi e ricche di risorse.\n🎮 Strategia consigliata\nOttima per build aggressive su produzione e materie prime."},
+
+  {nome:"Dracma greca",file:"Valute/dracma-greca.html",descrizione:"Dracma greca\n💠 Simbolo\nΔρ\n🏷 Categoria\nMoneta europea storica\n💰 Valore base\n0.003\n📈 Inflazione media\n~+1.2%/g\n🌀 Oscillazione\n±1.6%\n✅ Vantaggi\n+10% trading\n+7% commercio utenti\n+6% consumabili\n❌ Svantaggi\n+6% inflazione\nbanca centrale meno stabile\n📜 Descrizione\nValuta dinamica e volatile che favorisce attività economiche aggressive.\n🎮 Strategia consigliata\nPerfetta per trading e strategie economiche rischiose."},
+  {nome:"Escudo portoghese",file:"Valute/escudo-portoghese.html",descrizione:"Escudo portoghese\n💠 Simbolo\n₢\n🏷 Categoria\nMoneta europea storica\n💰 Valore base\n0.005\n📈 Inflazione media\n~+1.1%/g\n🌀 Oscillazione\n±1.3%\n✅ Vantaggi\n+7% commercio marittimo\n+6% commercio utenti\n+5% oggetti consumabili\n❌ Svantaggi\nvalore basso\ncrescita moderata\n📜 Descrizione\nValuta storica legata al commercio e alle rotte internazionali.\n🎮 Strategia consigliata\nOttima per commercio e scambi tra stati."},
+  {nome:"Fiorino olandese",file:"Valute/fiorino-olandese.html",descrizione:"Fiorino olandese\n💠 Simbolo\nƒ\n🏷 Categoria\nMoneta europea storica\n💰 Valore base\n0.45\n📈 Inflazione media\n~+1.0%/g\n🌀 Oscillazione\n±0.9%\n✅ Vantaggi\n+8% commercio internazionale\n+6% logistica\n+5% scambi tra stati\n❌ Svantaggi\n-4% industria pesante\nmercato moderato\n📜 Descrizione\nValuta storica molto usata nei commerci internazionali.\n🎮 Strategia consigliata\nPerfetta per mercati e scambi globali."},
+  {nome:"Franco belga",file:"Valute/franco-belga.html",descrizione:"Franco belga\n💠 Simbolo\nFB\n🏷 Categoria\nMoneta europea storica\n💰 Valore base\n0.025\n📈 Inflazione media\n~+1.1%/g\n🌀 Oscillazione\n±1.2%\n✅ Vantaggi\n+8% commercio europeo\n+6% logistica\n+5% scambi internazionali\n❌ Svantaggi\nvalore basso\nmercato competitivo\n📜 Descrizione\nValuta legata a un forte commercio europeo.\n🎮 Strategia consigliata\nOttima per mercati e commercio internazionale."},
+  {nome:"Franco francese",file:"Valute/franco-francese.html",descrizione:"Franco francese\n💠 Simbolo\n₣\n🏷 Categoria\nMoneta europea storica\n💰 Valore base\n0.98\n📈 Inflazione media\n~+1.0%/g\n🌀 Oscillazione\n±0.7%\n✅ Vantaggi\n+7% beni immobili\n+6% consumabili\n+5% industria\n❌ Svantaggi\n+4% tasse economiche\nmercato moderato\n📜 Descrizione\nValuta storica collegata a un’economia diversificata tra industria e servizi.\n🎮 Strategia consigliata\nBuona per build equilibrate tra consumo e industria."},
+  {nome:"Korona scandinava storica",file:"Valute/korona-scandinava-storica.html",descrizione:"Korona scandinava storica\n💠 Simbolo\nSKr\n🏷 Categoria\nMoneta europea storica\n💰 Valore base\n0.20\n📈 Inflazione media\n~+1.0%/g\n🌀 Oscillazione\n±0.9%\n✅ Vantaggi\n+7% stabilità economica\n+6% industria\n+5% commercio regionale\n❌ Svantaggi\nmercato limitato\ncrescita moderata\n📜 Descrizione\nValuta storica del nord Europa con economia stabile.\n🎮 Strategia consigliata\nBuona per build economiche prudenti."},
+  {nome:"Koruna slovacca",file:"Valute/koruna-slovacca.html",descrizione:"Koruna slovacca\n💠 Simbolo\nSKK\n🏷 Categoria\nMoneta europea storica\n💰 Valore base\n0.033\n📈 Inflazione media\n~+1.1%/g\n🌀 Oscillazione\n±1.2%\n✅ Vantaggi\n+7% industria\n+6% trasformazioni\n+4% competitività prezzi\n❌ Svantaggi\nvalore basso\nmercato piccolo\n📜 Descrizione\nValuta utile per economie industriali emergenti.\n🎮 Strategia consigliata\nBuona per produzione e trasformazioni."},
+  {nome:"Kroon estone",file:"Valute/kroon-estone.html",descrizione:"Kroon estone\n💠 Simbolo\nEEK\n🏷 Categoria\nMoneta europea storica\n💰 Valore base\n0.064\n📈 Inflazione media\n~+1.0%/g\n🌀 Oscillazione\n±1.1%\n✅ Vantaggi\n+8% economia digitale\n+6% transazioni rapide\n+5% trading\n❌ Svantaggi\nmercato molto piccolo\n-4% industria\n📜 Descrizione\nValuta storica di un’economia digitale avanzata.\n🎮 Strategia consigliata\nPerfetta per trading e mercati digitali."},
+  {nome:"Lats lettone",file:"Valute/lats-lettone.html",descrizione:"Lats lettone\n💠 Simbolo\nLVL\n🏷 Categoria\nMoneta europea storica\n💰 Valore base\n1.42\n📈 Inflazione media\n~+0.9%/g\n🌀 Oscillazione\n±0.7%\n✅ Vantaggi\n+8% stabilità monetaria\n+6% fiducia economica\n+5% investimenti\n❌ Svantaggi\nmercato piccolo\ncrescita moderata\n📜 Descrizione\nValuta forte per una piccola economia stabile.\n🎮 Strategia consigliata\nOttima per gestione capitale e investimenti."},
+  {nome:"Lira italiana",file:"Valute/lira-italiana.html",descrizione:"Lira italiana\n💠 Simbolo\n₤\n🏷 Categoria\nMoneta europea storica\n💰 Valore base\n0.85\n📈 Inflazione media\n~+1.0%/g\n🌀 Oscillazione\n±1.2%\n✅ Vantaggi\n+8% commercio utenti\n+6% oggetti consumabili\n+5% turismo\n❌ Svantaggi\n+5% inflazione\n-4% stabilità prezzi\n📜 Descrizione\nValuta storica associata a un’economia dinamica basata su commercio e consumi.\n🎮 Strategia consigliata\nPerfetta per vendita oggetti, turismo e commercio rapido."},
+  {nome:"Litas lituano",file:"Valute/litas-lituano.html",descrizione:"Litas lituano\n💠 Simbolo\nLTL\n🏷 Categoria\nMoneta europea storica\n💰 Valore base\n0.29\n📈 Inflazione media\n~+1.0%/g\n🌀 Oscillazione\n±1.0%\n✅ Vantaggi\n+7% industria\n+6% tecnologia\n+5% commercio\n❌ Svantaggi\nmercato piccolo\ncrescita moderata\n📜 Descrizione\nValuta legata a economie baltiche industriali in crescita.\n🎮 Strategia consigliata\nOttima per industria e tecnologia."},
+  {nome:"Marco finlandese",file:"Valute/marco-finlandese.html",descrizione:"Marco finlandese\n💠 Simbolo\nFIM\n🏷 Categoria\nMoneta europea storica\n💰 Valore base\n0.17\n📈 Inflazione media\n~+1.0%/g\n🌀 Oscillazione\n±0.8%\n✅ Vantaggi\n+7% tecnologia\n+6% industria avanzata\n+5% stabilità prezzi\n❌ Svantaggi\nmercato piccolo\ncrescita moderata\n📜 Descrizione\nValuta legata a economie tecnologiche e industriali stabili.\n🎮 Strategia consigliata\nOttima per tecnologia e produzione avanzata."},
+  {nome:"Marco tedesco",file:"Valute/marco-tedesco.html",descrizione:"Marco tedesco\n💠 Simbolo\nDM\n🏷 Categoria\nMoneta europea storica\n💰 Valore base\n1.05\n📈 Inflazione media\n~+0.9%/g\n🌀 Oscillazione\n±0.6%\n✅ Vantaggi\n+8% industria\n+6% trasformazioni\n+5% stabilità prezzi\n❌ Svantaggi\ncrescita moderata\n-3% trading speculativo\n📜 Descrizione\nValuta storica molto stabile legata alla forte industria tedesca.\n🎮 Strategia consigliata\nOttima per produzione industriale e trasformazioni."},
+  {nome:"Peseta spagnola",file:"Valute/peseta-spagnola.html",descrizione:"Peseta spagnola\n💠 Simbolo\n₧\n🏷 Categoria\nMoneta europea storica\n💰 Valore base\n0.006\n📈 Inflazione media\n~+1.1%/g\n🌀 Oscillazione\n±1.4%\n✅ Vantaggi\n+8% turismo\n+6% consumabili\n+5% commercio utenti\n❌ Svantaggi\nvalore basso\n+5% volatilità\n📜 Descrizione\nValuta storica legata a commercio e turismo con crescita dinamica ma meno stabile.\n🎮 Strategia consigliata\nOttima per economie turistiche e vendita oggetti."},
+  {nome:"Rublo sovietico",file:"Valute/rublo-sovietico.html",descrizione:"Rublo sovietico\n💠 Simbolo\nR₴\n🏷 Categoria\nMoneta europea storica\n💰 Valore base\n0.20\n📈 Inflazione media\n~+1.1%/g\n🌀 Oscillazione\n±1.5%\n✅ Vantaggi\n+9% industria pesante\n+7% produzione\n+6% risorse\n❌ Svantaggi\n-6% commercio internazionale\n+5% volatilità\n📜 Descrizione\nValuta legata a grandi economie industriali e risorse naturali.\n🎮 Strategia consigliata\nPerfetta per build industriali e produzione."},
+  {nome:"Schilling austriaco",file:"Valute/schilling-austriaco.html",descrizione:"Schilling austriaco\n💠 Simbolo\nATS\n🏷 Categoria\nMoneta europea storica\n💰 Valore base\n0.073\n📈 Inflazione media\n~+1.0%/g\n🌀 Oscillazione\n±0.8%\n✅ Vantaggi\n+7% stabilità economica\n+6% banca centrale\n+5% trasformazioni\n❌ Svantaggi\nmercato piccolo\ncrescita moderata\n📜 Descrizione\nValuta stabile e ordinata, legata a un’economia prudente.\n🎮 Strategia consigliata\nOttima per strategie economiche conservative."},
+
+  {nome:"Aureo romano",file:"Valute/aureo-romano.html",descrizione:"Aureo romano\n💠 Simbolo\nÆ\n🏷 Categoria\nMoneta antica europea\n💰 Valore base\n1.80\n📈 Inflazione media\n~+0.4%/g\n🌀 Oscillazione\n±0.5%\n✅ Vantaggi\n+12% prestigio\n+8% valore monetario\n+6% fiducia economica\n❌ Svantaggi\ncrescita lenta\n-5% flessibilità commerciale\n📜 Descrizione\nMoneta d’oro dell’Impero Romano, simbolo di grande ricchezza e potere economico.\n🎮 Strategia consigliata\nOttima per strategie patrimoniali e accumulo di ricchezza."},
+  {nome:"Denario romano",file:"Valute/denario-romano.html",descrizione:"Denario romano\n💠 Simbolo\nⅮ\n🏷 Categoria\nMoneta antica europea\n💰 Valore base\n0.40\n📈 Inflazione media\n~+0.5%/g\n🌀 Oscillazione\n±0.6%\n✅ Vantaggi\n+10% prestigio economico\n+7% commercio storico\n+5% stabilità monetaria\n❌ Svantaggi\nmercato limitato\n-4% flessibilità economica\n📜 Descrizione\nAntica moneta romana simbolo di potere economico e stabilità nell’antichità.\n🎮 Strategia consigliata\nPerfetta per economie prestigiose e crescita lenta ma stabile."},
+  {nome:"Ducato veneziano",file:"Valute/ducato-veneziano.html",descrizione:"Ducato veneziano\n💠 Simbolo\nÐ\n🏷 Categoria\nMoneta antica europea\n💰 Valore base\n0.65\n📈 Inflazione media\n~+0.5%/g\n🌀 Oscillazione\n±0.7%\n✅ Vantaggi\n+10% commercio internazionale\n+7% mercati marittimi\n+5% fiducia commerciale\n❌ Svantaggi\nmercato limitato\n-4% industria\n📜 Descrizione\nMoneta commerciale molto usata nel Mediterraneo durante il Medioevo.\n🎮 Strategia consigliata\nPerfetta per commercio tra stati e scambi internazionali."},
+  {nome:"Sesterzio romano",file:"Valute/sesterzio-romano.html",descrizione:"Sesterzio romano\n💠 Simbolo\nŜ\n🏷 Categoria\nMoneta antica europea\n💰 Valore base\n0.15\n📈 Inflazione media\n~+0.6%/g\n🌀 Oscillazione\n±0.8%\n✅ Vantaggi\n+7% commercio interno\n+6% consumi\n+5% economia urbana\n❌ Svantaggi\nvalore medio-basso\nmercato limitato\n📜 Descrizione\nMoneta molto diffusa nell’economia quotidiana dell’antica Roma.\n🎮 Strategia consigliata\nBuona per commercio locale e economia interna."},
+  {nome:"Solidus bizantino",file:"Valute/solidus-bizantino.html",descrizione:"Solidus bizantino\n💠 Simbolo\nΝΜ\n🏷 Categoria\nMoneta antica europea\n💰 Valore base\n1.20\n📈 Inflazione media\n~+0.4%/g\n🌀 Oscillazione\n±0.6%\n✅ Vantaggi\n+10% stabilità economica\n+7% prestigio monetario\n+6% commercio internazionale\n❌ Svantaggi\nmercato ristretto\ncrescita lenta\n📜 Descrizione\nMoneta d’oro bizantina famosa per la sua stabilità per secoli.\n🎮 Strategia consigliata\nPerfetta per strategie economiche stabili e prestigiose."},
+  {nome:"Stater greco",file:"Valute/stater-greco.html",descrizione:"Stater greco\n💠 Simbolo\nΔρΑ\n🏷 Categoria\nMoneta antica europea\n💰 Valore base\n0.70\n📈 Inflazione media\n~+0.5%/g\n🌀 Oscillazione\n±0.7%\n✅ Vantaggi\n+9% commercio mediterraneo\n+7% mercati antichi\n+5% prestigio culturale\n❌ Svantaggi\nmercato limitato\n-4% economia industriale\n📜 Descrizione\nMoneta utilizzata nelle città greche antiche per commercio e scambi internazionali.\n🎮 Strategia consigliata\nOttima per economie commerciali e scambi tra stati."},
+  {nome:"Tallero",file:"Valute/tallero.html",descrizione:"Tallero\n💠 Simbolo\nTh\n🏷 Categoria\nMoneta antica europea\n💰 Valore base\n0.30\n📈 Inflazione media\n~+0.5%/g\n🌀 Oscillazione\n±0.8%\n✅ Vantaggi\n+8% commercio europeo\n+6% stabilità monetaria\n+5% economia mineraria\n❌ Svantaggi\ncrescita moderata\nmercato medio\n📜 Descrizione\nMoneta diffusa in Europa centrale che ha influenzato molte valute moderne.\n🎮 Strategia consigliata\nOttima per economie minerarie e commercio regionale."},
+
+  {nome:"Rabrierix",file:"Valute/rabrierix.html",descrizione:"Rabrierix\n💠 Simbolo\nRĝ\n🏷 Categoria\nMoneta inventata BANCA R\n💰 Valore base\n1.05\n📈 Inflazione media\n~+2.0%/g\n🌀 Oscillazione\n±8%\n✅ Vantaggi\n+10% profitti trading\n+7% giochi e lotterie\n+6% volatilità speculativa\n❌ Svantaggi\n+7% instabilità economica\nrischio elevato\n📜 Descrizione\nValuta molto dinamica e volatile pensata per economie speculative.\n🎮 Strategia consigliata\nIdeale per trading aggressivo e gioco d’azzardo."},
+  {nome:"Raddalenix",file:"Valute/raddalenix.html",descrizione:"Raddalenix\n💠 Simbolo\nR•\n🏷 Categoria\nMoneta inventata BANCA R\n💰 Valore base\n1.00\n📈 Inflazione media\n~+1.5%/g\n🌀 Oscillazione\n±5%\n✅ Vantaggi\n+8% rendite beni permanenti\n-10% costi manutenzione\n+6% investimenti\n❌ Svantaggi\n+5% tassa interna\ncrescita moderata\n📜 Descrizione\nValuta pensata per economie basate su immobili e rendite.\n🎮 Strategia consigliata\nPerfetta per investimenti immobiliari e beni permanenti."},
+  {nome:"Randrey",file:"Valute/randrey.html",descrizione:"Randrey\n💠 Simbolo\nRæ\n🏷 Categoria\nMoneta inventata BANCA R\n💰 Valore base\n0.95\n📈 Inflazione media\n~+1.0%/g\n🌀 Oscillazione\n±3%\n✅ Vantaggi\n-5% interessi prestiti\n+5% stabilità economica\n+4% commercio utenti\n❌ Svantaggi\ncrescita moderata\nprestazioni economiche equilibrate\n📜 Descrizione\nValuta bilanciata pensata per economie stabili e gestione prudente.\n🎮 Strategia consigliata\nPerfetta per giocatori che vogliono una crescita costante."},
+  {nome:"Retifex",file:"Valute/retifex.html",descrizione:"Retifex\n💠 Simbolo\nRğ\n🏷 Categoria\nMoneta inventata BANCA R\n💰 Valore base\n1.15\n📈 Inflazione media\n~+2.2%/g\n🌀 Oscillazione\n±9%\n✅ Vantaggi\n+12% oggetti rari\n+8% collezionismo\n+6% oggetti speciali\n❌ Svantaggi\noscillazioni forti\n+5% volatilità economica\n📜 Descrizione\nValuta rara e potente pensata per economie basate su oggetti rari.\n🎮 Strategia consigliata\nOttima per giocatori che puntano su oggetti rari e mercato speciale."},
+  {nome:"Retixers",file:"Valute/retixers.html",descrizione:"Retixers\n💠 Simbolo\nRł\n🏷 Categoria\nMoneta inventata BANCA R\n💰 Valore base\n0.90\n📈 Inflazione media\n~+1.8%/g\n🌀 Oscillazione\n±6%\n✅ Vantaggi\n+10% commercio tra stati\n+6% logistica\n+5% commercio utenti\n❌ Svantaggi\nsensibile a inflazione globale\n+4% volatilità mercato\n📜 Descrizione\nValuta pensata per economie commerciali e scambi internazionali.\n🎮 Strategia consigliata\nPerfetta per mercati e commercio globale."}
+];
+
+valute.sort((a,b) => a.nome.localeCompare(b.nome,"it"));
+
+const menu = document.getElementById("menu");
+const title = document.getElementById("currency-title");
+const descriptionPreview = document.getElementById("currency-description-preview");
+const viewer = document.getElementById("currency-viewer");
+const goToPaesiButton = document.getElementById("go-to-paesi");
+
+const showMoreButton = document.getElementById("show-more-description");
+const descriptionModal = document.getElementById("description-modal");
+const closeDescriptionModal = document.getElementById("close-description-modal");
+const modalCurrencyTitle = document.getElementById("modal-currency-title");
+const modalCurrencyDescription = document.getElementById("modal-currency-description");
+
+let valutaSelezionata = null;
+
+function showError(message){
+  viewer.innerHTML = `<div class="viewer-error">${message}</div>`;
+}
+
+function escapeHtml(text){
+  return text
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function convertTextToHtml(text){
+  return escapeHtml(text).replace(/\n/g, "<br>");
+}
+
+function extractVisualFromHtml(htmlText){
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(htmlText,"text/html");
+
+  const img = doc.querySelector('img[src^="data:image"]');
+  if(img){
+    const newImg = document.createElement("img");
+    newImg.src = img.getAttribute("src");
+    newImg.alt = img.getAttribute("alt") || "Immagine della valuta";
+    return newImg;
+  }
+
+  const svg = doc.querySelector("svg");
+  if(svg){
+    return document.importNode(svg,true);
+  }
+
+  return null;
+}
+
+async function caricaImmagineDaFile(filePath){
+  try{
+    const response = await fetch(filePath);
+    const htmlText = await response.text();
+    const visual = extractVisualFromHtml(htmlText);
+
+    if(!visual){
+      showError("Immagine non trovata.");
+      return;
+    }
+
+    viewer.innerHTML = "";
+    viewer.appendChild(visual);
+  }catch(e){
+    showError("Errore caricamento file");
+  }
+}
+
+function openDescriptionModal(){
+  if(!valutaSelezionata) return;
+
+  modalCurrencyTitle.textContent = valutaSelezionata.nome;
+  modalCurrencyDescription.textContent = valutaSelezionata.descrizione;
+  descriptionModal.classList.add("open");
+  descriptionModal.setAttribute("aria-hidden", "false");
+}
+
+function closeDescriptionModalFn(){
+  descriptionModal.classList.remove("open");
+  descriptionModal.setAttribute("aria-hidden", "true");
+}
+
+function aggiornaDescrizione(valuta){
+  descriptionPreview.innerHTML = convertTextToHtml(valuta.descrizione);
+  descriptionPreview.classList.remove("clamped");
+
+  requestAnimationFrame(() => {
+    const isOverflowing = descriptionPreview.scrollHeight > descriptionPreview.clientHeight + 1;
+
+    if(isOverflowing){
+      descriptionPreview.classList.add("clamped");
+      showMoreButton.style.display = "inline-block";
+    } else {
+      showMoreButton.style.display = "none";
+    }
+  });
+}
+
+function caricaValuta(valuta,button){
+  valutaSelezionata = valuta;
+
+  title.textContent = valuta.nome;
+  aggiornaDescrizione(valuta);
+  caricaImmagineDaFile(valuta.file);
+
+  document.querySelectorAll(".menu button")
+    .forEach(btn => btn.classList.remove("active"));
+
+  if(button){
+    button.classList.add("active");
+  }
+
+  closeDescriptionModalFn();
+}
+
+goToPaesiButton.addEventListener("click", () => {
+  if(!valutaSelezionata){
+    alert("Seleziona prima una valuta.");
+    return;
+  }
+
+  const url = `Paesi.html?valuta=${encodeURIComponent(valutaSelezionata.nome)}`;
+  window.location.href = url;
+});
+
+showMoreButton.addEventListener("click", openDescriptionModal);
+closeDescriptionModal.addEventListener("click", closeDescriptionModalFn);
+
+descriptionModal.addEventListener("click", (event) => {
+  if(event.target === descriptionModal){
+    closeDescriptionModalFn();
+  }
+});
+
+document.addEventListener("keydown", (event) => {
+  if(event.key === "Escape" && descriptionModal.classList.contains("open")){
+    closeDescriptionModalFn();
+  }
+});
+
+window.addEventListener("resize", () => {
+  if(valutaSelezionata){
+    aggiornaDescrizione(valutaSelezionata);
+  }
+});
+
+valute.forEach((valuta,index) => {
+  const button = document.createElement("button");
+  button.textContent = valuta.nome;
+
+  if(index === 0){
+    button.classList.add("active");
+  }
+
+  button.onclick = () => caricaValuta(valuta,button);
+  menu.appendChild(button);
+});
+
+if(valute.length > 0){
+  caricaValuta(valute[0], menu.querySelector("button"));
+}
+</script>
+
+</body>
+</html>
