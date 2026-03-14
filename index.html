@@ -128,11 +128,28 @@ body{
   padding:22px;
 }
 
-.description-body p{
-  margin:0 0 20px 0;
+.description-preview{
+  margin:0 0 14px 0;
   line-height:1.7;
   font-size:16px;
   white-space:pre-line;
+}
+
+.show-more-button{
+  display:inline-block;
+  margin:0 0 20px 0;
+  padding:0;
+  border:none;
+  background:none;
+  color:#2563eb;
+  font-size:15px;
+  font-weight:600;
+  cursor:pointer;
+  text-decoration:underline;
+}
+
+.show-more-button:hover{
+  color:#1d4ed8;
 }
 
 .next-page-button{
@@ -203,6 +220,78 @@ body{
   padding:20px;
 }
 
+/* MODALE DESCRIZIONE */
+.modal-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(15,23,42,0.55);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  z-index:9999;
+}
+
+.modal-overlay.open{
+  display:flex;
+}
+
+.modal-box{
+  width:min(720px, 100%);
+  max-height:min(80dvh, 900px);
+  background:#ffffff;
+  border-radius:16px;
+  box-shadow:0 20px 50px rgba(0,0,0,0.25);
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+}
+
+.modal-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  padding:18px 20px;
+  border-bottom:1px solid #e5e7eb;
+  background:#f9fafb;
+}
+
+.modal-header h3{
+  margin:0;
+  font-size:22px;
+  line-height:1.2;
+}
+
+.modal-close{
+  border:none;
+  background:#e5e7eb;
+  color:#111827;
+  width:38px;
+  height:38px;
+  border-radius:10px;
+  font-size:22px;
+  line-height:1;
+  cursor:pointer;
+  flex-shrink:0;
+}
+
+.modal-close:hover{
+  background:#d1d5db;
+}
+
+.modal-body{
+  padding:20px;
+  overflow-y:auto;
+}
+
+.modal-body p{
+  margin:0;
+  font-size:16px;
+  line-height:1.8;
+  white-space:pre-line;
+}
+
 /* MOBILE */
 @media(max-width:980px){
   .layout{
@@ -269,9 +358,13 @@ body{
     padding:16px;
   }
 
-  .description-body p{
+  .description-preview{
     font-size:15px;
     line-height:1.6;
+  }
+
+  .show-more-button{
+    font-size:14px;
   }
 
   .next-page-button{
@@ -289,6 +382,27 @@ body{
 
   .viewer-content{
     padding:8px;
+  }
+
+  .modal-overlay{
+    padding:12px;
+  }
+
+  .modal-header{
+    padding:14px 16px;
+  }
+
+  .modal-header h3{
+    font-size:20px;
+  }
+
+  .modal-body{
+    padding:16px;
+  }
+
+  .modal-body p{
+    font-size:15px;
+    line-height:1.7;
   }
 }
 </style>
@@ -312,9 +426,15 @@ body{
         </div>
 
         <div class="description-body">
-          <p id="country-description">
-Seleziona uno Stato dal menu a sinistra per visualizzare la descrizione e l'immagine.
+          <p id="country-description-preview" class="description-preview">
+            Seleziona uno Stato dal menu a sinistra per visualizzare la descrizione e l'immagine.
           </p>
+
+          <button id="show-more-description" class="show-more-button" type="button" style="display:none;">
+            Mostra di più
+          </button>
+
+          <br>
 
           <button id="go-to-valute" class="next-page-button" type="button">
             Vai a Valute
@@ -341,11 +461,24 @@ Seleziona uno Stato dal menu a sinistra per visualizzare la descrizione e l'imma
 
 </div>
 
+<!-- MODALE -->
+<div id="description-modal" class="modal-overlay" aria-hidden="true">
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modal-country-title">
+    <div class="modal-header">
+      <h3 id="modal-country-title">Descrizione completa</h3>
+      <button id="close-description-modal" class="modal-close" type="button" aria-label="Chiudi">×</button>
+    </div>
+    <div class="modal-body">
+      <p id="modal-country-description"></p>
+    </div>
+  </div>
+</div>
+
 <script>
 const paesi = [
-  {nome:"Austria",file:"Paese/austria.html",descrizione:"Qui."},
+  {nome:"Austria",file:"Paese/austria.html",descrizione:"Qui puoi inserire la descrizione dell'Austria."},
   {nome:"Belgio",file:"Paese/belgio.html",descrizione:"Qui puoi inserire la descrizione del Belgio."},
-  {nome:"Italia",file:"Paese/italia.html",descrizione:"Italia 🏛 Classe economica Turistica / Commerciale/ 📊 Livello economia Sviluppata/ 📈 Inflazione locale +2.3% media 👥 Popolazione (scala gioco) Grande 💰 Forza economica / PIL simulato Alta/ 🛢️ Risorse principali turismo, agroalimentare, manifattura, logistica/ 🧪 Tecnologia iniziale 52/100/ ✅ Pro +10% bonus oggetti alimentari +6% commercio tra utenti (QR trade) +5% successo baratti +3% rendite beni immobili/ ❌ Contro +5% tassa trasferimenti inflazione leggermente più alta -4% efficienza industriale/ 📜 Descrizione Mercato dinamico e molto orientato al commercio e ai consumi. Il settore alimentare e turistico genera scambi frequenti tra utenti./ 🎮 Strategia consigliata Ottimo per vendita oggetti, commercio e baratto."},
+  {nome:"Italia",file:"Paese/italia.html",descrizione:"Qui puoi inserire la descrizione dell'Italia."},
   {nome:"Francia",file:"Paese/francia.html",descrizione:"Qui puoi inserire la descrizione della Francia."},
   {nome:"Irlanda",file:"Paese/irlanda.html",descrizione:"Qui puoi inserire la descrizione dell'Irlanda."},
   {nome:"Lussemburgo",file:"Paese/lussemburgo.html",descrizione:"Qui puoi inserire la descrizione del Lussemburgo."},
@@ -393,9 +526,15 @@ paesi.sort((a,b) => a.nome.localeCompare(b.nome,"it"));
 
 const menu = document.getElementById("menu");
 const title = document.getElementById("country-title");
-const description = document.getElementById("country-description");
+const descriptionPreview = document.getElementById("country-description-preview");
 const viewer = document.getElementById("country-viewer");
 const goToValuteButton = document.getElementById("go-to-valute");
+
+const showMoreButton = document.getElementById("show-more-description");
+const descriptionModal = document.getElementById("description-modal");
+const closeDescriptionModal = document.getElementById("close-description-modal");
+const modalCountryTitle = document.getElementById("modal-country-title");
+const modalCountryDescription = document.getElementById("modal-country-description");
 
 let paeseSelezionato = null;
 
@@ -411,6 +550,7 @@ function extractVisualFromHtml(htmlText){
   if(img){
     const newImg = document.createElement("img");
     newImg.src = img.getAttribute("src");
+    newImg.alt = img.getAttribute("alt") || "Immagine del paese";
     return newImg;
   }
 
@@ -440,11 +580,59 @@ async function caricaImmagineDaFile(filePath){
   }
 }
 
+function createDescriptionPreview(text, maxLength = 140){
+  const cleanText = (text || "").trim();
+
+  if(cleanText.length <= maxLength){
+    return {
+      preview: cleanText,
+      truncated: false
+    };
+  }
+
+  let shortText = cleanText.slice(0, maxLength);
+  const lastSpace = shortText.lastIndexOf(" ");
+
+  if(lastSpace > 0){
+    shortText = shortText.slice(0, lastSpace);
+  }
+
+  return {
+    preview: shortText + "...",
+    truncated: true
+  };
+}
+
+function openDescriptionModal(){
+  if(!paeseSelezionato) return;
+
+  modalCountryTitle.textContent = paeseSelezionato.nome;
+  modalCountryDescription.textContent = paeseSelezionato.descrizione;
+  descriptionModal.classList.add("open");
+  descriptionModal.setAttribute("aria-hidden", "false");
+}
+
+function closeDescriptionModalFn(){
+  descriptionModal.classList.remove("open");
+  descriptionModal.setAttribute("aria-hidden", "true");
+}
+
+function aggiornaDescrizione(paese){
+  const result = createDescriptionPreview(paese.descrizione, 140);
+  descriptionPreview.textContent = result.preview;
+
+  if(result.truncated){
+    showMoreButton.style.display = "inline-block";
+  } else {
+    showMoreButton.style.display = "none";
+  }
+}
+
 function caricaPaese(paese,button){
   paeseSelezionato = paese;
 
   title.textContent = paese.nome;
-  description.textContent = paese.descrizione;
+  aggiornaDescrizione(paese);
   caricaImmagineDaFile(paese.file);
 
   document.querySelectorAll(".menu button")
@@ -453,6 +641,8 @@ function caricaPaese(paese,button){
   if(button){
     button.classList.add("active");
   }
+
+  closeDescriptionModalFn();
 }
 
 goToValuteButton.addEventListener("click", () => {
@@ -463,6 +653,21 @@ goToValuteButton.addEventListener("click", () => {
 
   const url = `Valute.html?stato=${encodeURIComponent(paeseSelezionato.nome)}`;
   window.location.href = url;
+});
+
+showMoreButton.addEventListener("click", openDescriptionModal);
+closeDescriptionModal.addEventListener("click", closeDescriptionModalFn);
+
+descriptionModal.addEventListener("click", (event) => {
+  if(event.target === descriptionModal){
+    closeDescriptionModalFn();
+  }
+});
+
+document.addEventListener("keydown", (event) => {
+  if(event.key === "Escape" && descriptionModal.classList.contains("open")){
+    closeDescriptionModalFn();
+  }
 });
 
 paesi.forEach((paese,index) => {
