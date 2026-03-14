@@ -1,452 +1,473 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Atlante Stati Europei</title>
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Atlante Stati Europei</title>
 
-    html, body {
-      margin: 0;
-      padding: 0;
-      min-height: 100%;
-      font-family: Arial, sans-serif;
-      background: #f5f7fa;
-      color: #222;
-    }
+<style>
 
-    body {
-      min-height: 100dvh;
-    }
+*{
+box-sizing:border-box;
+}
 
-    .layout {
-      display: flex;
-      min-height: 100dvh;
-      width: 100%;
-    }
+html,body{
+margin:0;
+padding:0;
+min-height:100%;
+font-family:Arial,sans-serif;
+background:#f5f7fa;
+color:#222;
+}
 
-    .sidebar {
-      width: 280px;
-      min-width: 220px;
-      background: #1f2937;
-      color: white;
-      display: flex;
-      flex-direction: column;
-      border-right: 1px solid #ccc;
-      flex-shrink: 0;
-    }
+body{
+min-height:100dvh;
+}
 
-    .sidebar h1 {
-      font-size: 20px;
-      margin: 0;
-      padding: 20px;
-      border-bottom: 1px solid rgba(255,255,255,0.15);
-      line-height: 1.3;
-    }
+.layout{
+display:flex;
+height:100dvh;
+width:100%;
+overflow:hidden;
+}
 
-    .menu {
-      overflow-y: auto;
-      padding: 10px;
-      flex: 1;
-    }
+.sidebar{
+width:280px;
+min-width:220px;
+height:100dvh;
+background:#1f2937;
+color:white;
+display:flex;
+flex-direction:column;
+border-right:1px solid #ccc;
+flex-shrink:0;
+overflow:hidden;
+}
 
-    .menu button {
-      width: 100%;
-      text-align: left;
-      padding: 12px 14px;
-      margin-bottom: 8px;
-      border: none;
-      border-radius: 8px;
-      background: #374151;
-      color: white;
-      cursor: pointer;
-      transition: background 0.2s ease;
-      font-size: 15px;
-      line-height: 1.35;
-    }
+.sidebar h1{
+font-size:20px;
+margin:0;
+padding:20px;
+border-bottom:1px solid rgba(255,255,255,0.15);
+line-height:1.3;
+flex-shrink:0;
+}
 
-    .menu button:hover {
-      background: #4b5563;
-    }
+.menu{
+overflow-y:auto;
+overflow-x:hidden;
+padding:10px;
+flex:1;
+min-height:0;
+}
 
-    .menu button.active {
-      background: #2563eb;
-    }
+.menu button{
+width:100%;
+text-align:left;
+padding:12px 14px;
+margin-bottom:8px;
+border:none;
+border-radius:8px;
+background:#374151;
+color:white;
+cursor:pointer;
+transition:background 0.2s ease;
+font-size:15px;
+line-height:1.35;
+}
 
-    .content {
-      flex: 1;
-      min-width: 0;
-      padding: 20px;
-      overflow-y: auto;
-      background: #eef2f7;
-    }
+.menu button:hover{
+background:#4b5563;
+}
 
-    .content-inner {
-      width: 100%;
-      max-width: 1280px;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: minmax(320px, 430px) minmax(320px, 1fr);
-      gap: 20px;
-      align-items: stretch;
-    }
+.menu button.active{
+background:#2563eb;
+}
 
-    .description-panel,
-    .viewer-panel {
-      background: #ffffff;
-      border: 1px solid #dbe2ea;
-      border-radius: 14px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-      overflow: hidden;
-    }
+.content{
+flex:1;
+min-width:0;
+height:100dvh;
+padding:20px;
+overflow-y:auto;
+background:#eef2f7;
+}
 
-    .description-header,
-    .viewer-header {
-      padding: 18px 22px;
-      border-bottom: 1px solid #e5e7eb;
-      background: #f9fafb;
-    }
+.content-inner{
+width:100%;
+max-width:1280px;
+margin:0 auto;
+display:grid;
+grid-template-columns:minmax(320px,430px) minmax(320px,1fr);
+gap:20px;
+align-items:start;
+}
 
-    .description-header h2,
-    .viewer-header h3 {
-      margin: 0;
-      line-height: 1.2;
-    }
+.description-panel,
+.viewer-panel{
+background:#ffffff;
+border:1px solid #dbe2ea;
+border-radius:14px;
+box-shadow:0 4px 12px rgba(0,0,0,0.08);
+overflow:hidden;
+}
 
-    .description-body {
-      padding: 22px;
-    }
+.description-header,
+.viewer-header{
+padding:18px 22px;
+border-bottom:1px solid #e5e7eb;
+background:#f9fafb;
+}
 
-    .description-body p {
-      margin: 0;
-      line-height: 1.7;
-      font-size: 16px;
-      white-space: pre-line;
-    }
+.description-header h2,
+.viewer-header h3{
+margin:0;
+line-height:1.2;
+}
 
-    .viewer-body {
-      padding: 14px;
-      background: #eef2f7;
-    }
+.description-body{
+padding:22px;
+}
 
-    .viewer-frame {
-      width: 100%;
-      height: clamp(320px, 62vh, 760px);
-      border: 1px solid #cbd5e1;
-      border-radius: 12px;
-      overflow: hidden;
-      background: #fff;
-      position: relative;
-    }
+.description-body p{
+margin:0;
+line-height:1.7;
+font-size:16px;
+white-space:pre-line;
+}
 
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      display: block;
-      background: #fff;
-    }
+.viewer-body{
+padding:14px;
+background:#eef2f7;
+}
 
-    @media (max-width: 980px) {
-      .layout {
-        flex-direction: column;
-      }
+.viewer-frame{
+width:100%;
+height:clamp(320px,62vh,760px);
+border:1px solid #cbd5e1;
+border-radius:12px;
+overflow:hidden;
+background:#fff;
+display:flex;
+align-items:center;
+justify-content:center;
+}
 
-      .sidebar {
-        width: 100%;
-        min-width: 100%;
-        border-right: none;
-        border-bottom: 1px solid #ccc;
-      }
+.viewer-content{
+width:100%;
+height:100%;
+padding:12px;
+display:flex;
+align-items:center;
+justify-content:center;
+overflow:hidden;
+background:#ffffff;
+}
 
-      .menu {
-        max-height: 180px;
-      }
+.viewer-content img,
+.viewer-content svg{
+max-width:100%;
+max-height:100%;
+width:auto;
+height:auto;
+display:block;
+object-fit:contain;
+}
 
-      .content-inner {
-        grid-template-columns: 1fr;
-      }
+.viewer-placeholder,
+.viewer-error{
+color:#4b5563;
+text-align:center;
+font-size:15px;
+line-height:1.5;
+padding:20px;
+}
 
-      .viewer-frame {
-        height: clamp(260px, 48vh, 520px);
-      }
-    }
+/* MOBILE */
 
-    @media (max-width: 600px) {
-      .content {
-        padding: 10px;
-      }
+@media(max-width:980px){
 
-      .sidebar h1 {
-        padding: 14px 16px;
-        font-size: 18px;
-      }
+.layout{
+flex-direction:column;
+height:auto;
+min-height:100dvh;
+overflow:visible;
+}
 
-      .menu {
-        max-height: 150px;
-        padding: 8px;
-      }
+.sidebar{
+width:100%;
+min-width:100%;
+height:auto;
+border-right:none;
+border-bottom:1px solid #ccc;
+overflow:visible;
+}
 
-      .menu button {
-        padding: 10px 12px;
-        margin-bottom: 6px;
-        font-size: 14px;
-      }
+.menu{
+max-height:180px;
+}
 
-      .description-header,
-      .viewer-header {
-        padding: 14px 16px;
-      }
+.content{
+height:auto;
+overflow-y:visible;
+}
 
-      .description-body {
-        padding: 16px;
-      }
+.content-inner{
+grid-template-columns:1fr;
+}
 
-      .description-body p {
-        font-size: 15px;
-        line-height: 1.6;
-      }
+.viewer-frame{
+height:clamp(260px,48vh,520px);
+}
 
-      .viewer-body {
-        padding: 10px;
-      }
+}
 
-      .viewer-frame {
-        height: clamp(220px, 42vh, 420px);
-      }
-    }
-  </style>
+@media(max-width:600px){
+
+.content{
+padding:10px;
+}
+
+.sidebar h1{
+padding:14px 16px;
+font-size:18px;
+}
+
+.menu{
+max-height:150px;
+padding:8px;
+}
+
+.menu button{
+padding:10px 12px;
+margin-bottom:6px;
+font-size:14px;
+}
+
+.description-header,
+.viewer-header{
+padding:14px 16px;
+}
+
+.description-body{
+padding:16px;
+}
+
+.description-body p{
+font-size:15px;
+line-height:1.6;
+}
+
+.viewer-body{
+padding:10px;
+}
+
+.viewer-frame{
+height:clamp(220px,42vh,420px);
+}
+
+.viewer-content{
+padding:8px;
+}
+
+}
+
+</style>
 </head>
+
 <body>
-  <div class="layout">
-    <aside class="sidebar">
-      <h1>Stati Europei</h1>
-      <div class="menu" id="menu"></div>
-    </aside>
 
-    <main class="content">
-      <div class="content-inner">
-        <section class="description-panel">
-          <div class="description-header">
-            <h2 id="country-title">Seleziona uno Stato</h2>
-          </div>
-          <div class="description-body">
-            <p id="country-description">
-              Seleziona uno Stato dal menu a sinistra per visualizzare la descrizione e l'immagine.
-            </p>
-          </div>
-        </section>
+<div class="layout">
 
-        <section class="viewer-panel">
-          <div class="viewer-header">
-            <h3>Immagine del Paese</h3>
-          </div>
-          <div class="viewer-body">
-            <div class="viewer-frame">
-              <iframe
-                id="country-frame"
-                src=""
-                title="Visualizzatore paese"
-                loading="eager">
-              </iframe>
-            </div>
-          </div>
-        </section>
-      </div>
-    </main>
-  </div>
+<aside class="sidebar">
+<h1>Stati Europei</h1>
+<div class="menu" id="menu"></div>
+</aside>
 
-  <script>
-    const paesi = [
-      { nome: "Austria", file: "Paese/austria.html", descrizione: "Qui puoi inserire la descrizione dell'Austria." },
-      { nome: "Belgio", file: "Paese/belgio.html", descrizione: "Qui puoi inserire la descrizione del Belgio." },
-      { nome: "Italia", file: "Paese/italia.html", descrizione: "Qui puoi inserire la descrizione dell'Italia." },
-      { nome: "Francia", file: "Paese/francia.html", descrizione: "Qui puoi inserire la descrizione della Francia." },
-      { nome: "Irlanda", file: "Paese/irlanda.html", descrizione: "Qui puoi inserire la descrizione dell'Irlanda." },
-      { nome: "Lussemburgo", file: "Paese/lussemburgo.html", descrizione: "Qui puoi inserire la descrizione del Lussemburgo." },
-      { nome: "Paesi Bassi", file: "Paese/paesi-bassi.html", descrizione: "Qui puoi inserire la descrizione dei Paesi Bassi." },
-      { nome: "Svizzera", file: "Paese/svizzera.html", descrizione: "Qui puoi inserire la descrizione della Svizzera." },
-      { nome: "Albania", file: "Paese/albania.html", descrizione: "Qui puoi inserire la descrizione dell'Albania." },
-      { nome: "Bosnia ed Erzegovina", file: "Paese/bosnia-erzegovina.html", descrizione: "Qui puoi inserire la descrizione della Bosnia ed Erzegovina." },
-      { nome: "Bulgaria", file: "Paese/bulgaria.html", descrizione: "Qui puoi inserire la descrizione della Bulgaria." },
-      { nome: "Cipro", file: "Paese/cipro.html", descrizione: "Qui puoi inserire la descrizione di Cipro." },
-      { nome: "Croazia", file: "Paese/croazia.html", descrizione: "Qui puoi inserire la descrizione della Croazia." },
-      { nome: "Grecia", file: "Paese/grecia.html", descrizione: "Qui puoi inserire la descrizione della Grecia." },
-      { nome: "Macedonia del Nord", file: "Paese/macedonia-del-nord.html", descrizione: "Qui puoi inserire la descrizione della Macedonia del Nord." },
-      { nome: "Malta", file: "Paese/malta.html", descrizione: "Qui puoi inserire la descrizione di Malta." },
-      { nome: "Montenegro", file: "Paese/montenegro.html", descrizione: "Qui puoi inserire la descrizione del Montenegro." },
-      { nome: "Portogallo", file: "Paese/portogallo.html", descrizione: "Qui puoi inserire la descrizione del Portogallo." },
-      { nome: "Serbia", file: "Paese/serbia.html", descrizione: "Qui puoi inserire la descrizione della Serbia." },
-      { nome: "Slovenia", file: "Paese/slovenia.html", descrizione: "Qui puoi inserire la descrizione della Slovenia." },
-      { nome: "Spagna", file: "Paese/spagna.html", descrizione: "Qui puoi inserire la descrizione della Spagna." },
-      { nome: "Danimarca", file: "Paese/danimarca.html", descrizione: "Qui puoi inserire la descrizione della Danimarca." },
-      { nome: "Estonia", file: "Paese/estonia.html", descrizione: "Qui puoi inserire la descrizione dell'Estonia." },
-      { nome: "Finlandia", file: "Paese/finlandia.html", descrizione: "Qui puoi inserire la descrizione della Finlandia." },
-      { nome: "Islanda", file: "Paese/islanda.html", descrizione: "Qui puoi inserire la descrizione dell'Islanda." },
-      { nome: "Lettonia", file: "Paese/lettonia.html", descrizione: "Qui puoi inserire la descrizione della Lettonia." },
-      { nome: "Lituania", file: "Paese/lituania.html", descrizione: "Qui puoi inserire la descrizione della Lituania." },
-      { nome: "Norvegia", file: "Paese/norvegia.html", descrizione: "Qui puoi inserire la descrizione della Norvegia." },
-      { nome: "Armenia", file: "Paese/armenia.html", descrizione: "Qui puoi inserire la descrizione dell'Armenia." },
-      { nome: "Azerbaigian", file: "Paese/azerbaigian.html", descrizione: "Qui puoi inserire la descrizione dell'Azerbaigian." },
-      { nome: "Bielorussia", file: "Paese/bielorussia.html", descrizione: "Qui puoi inserire la descrizione della Bielorussia." },
-      { nome: "Georgia", file: "Paese/georgia.html", descrizione: "Qui puoi inserire la descrizione della Georgia." },
-      { nome: "Germania", file: "Paese/germania.html", descrizione: "Qui puoi inserire la descrizione della Germania." },
-      { nome: "Moldavia", file: "Paese/moldavia.html", descrizione: "Qui puoi inserire la descrizione della Moldavia." },
-      { nome: "Polonia", file: "Paese/polonia.html", descrizione: "Qui puoi inserire la descrizione della Polonia." },
-      { nome: "Regno Unito", file: "Paese/regno-unito.html", descrizione: "Qui puoi inserire la descrizione del Regno Unito." },
-      { nome: "Repubblica Ceca", file: "Paese/repubblica-ceca.html", descrizione: "Qui puoi inserire la descrizione della Repubblica Ceca." },
-      { nome: "Romania", file: "Paese/romania.html", descrizione: "Qui puoi inserire la descrizione della Romania." },
-      { nome: "Russia", file: "Paese/russia.html", descrizione: "Qui puoi inserire la descrizione della Russia." },
-      { nome: "Slovacchia", file: "Paese/slovacchia.html", descrizione: "Qui puoi inserire la descrizione della Slovacchia." },
-      { nome: "Ucraina", file: "Paese/ucraina.html", descrizione: "Qui puoi inserire la descrizione dell'Ucraina." },
-      { nome: "Ungheria", file: "Paese/ungheria.html", descrizione: "Qui puoi inserire la descrizione dell'Ungheria." },
-      { nome: "Kazakistan", file: "Paese/kazakistan.html", descrizione: "Qui puoi inserire la descrizione del Kazakistan." },
-      { nome: "Turchia", file: "Paese/turchia.html", descrizione: "Qui puoi inserire la descrizione della Turchia." }
-    ];
+<main class="content">
 
-    paesi.sort((a, b) => a.nome.localeCompare(b.nome, "it"));
+<div class="content-inner">
 
-    const menu = document.getElementById("menu");
-    const title = document.getElementById("country-title");
-    const description = document.getElementById("country-description");
-    const frame = document.getElementById("country-frame");
+<section class="description-panel">
 
-    function adattaIframe() {
-      try {
-        const doc = frame.contentDocument || frame.contentWindow.document;
-        if (!doc || !doc.body) return;
+<div class="description-header">
+<h2 id="country-title">Seleziona uno Stato</h2>
+</div>
 
-        // Evita di ricreare la struttura ogni volta
-        if (!doc.getElementById("fit-style")) {
-          const style = doc.createElement("style");
-          style.id = "fit-style";
-          style.textContent = `
-            html, body {
-              margin: 0 !important;
-              padding: 0 !important;
-              width: 100% !important;
-              height: 100% !important;
-              overflow: hidden !important;
-              background: #ffffff !important;
-            }
+<div class="description-body">
+<p id="country-description">
+Seleziona uno Stato dal menu a sinistra per visualizzare la descrizione e l'immagine.
+</p>
+</div>
 
-            body {
-              position: relative !important;
-            }
+</section>
 
-            #fit-root {
-              position: absolute !important;
-              inset: 0 !important;
-              display: flex !important;
-              align-items: center !important;
-              justify-content: center !important;
-              overflow: hidden !important;
-              padding: 12px !important;
-              background: #ffffff !important;
-            }
+<section class="viewer-panel">
 
-            #fit-stage {
-              transform-origin: center center !important;
-              will-change: transform !important;
-            }
+<div class="viewer-header">
+<h3>Immagine del Paese</h3>
+</div>
 
-            img, svg, canvas, picture, video, object, embed {
-              display: block !important;
-              max-width: none !important;
-              max-height: none !important;
-            }
-          `;
-          doc.head.appendChild(style);
+<div class="viewer-body">
 
-          const fitRoot = doc.createElement("div");
-          fitRoot.id = "fit-root";
+<div class="viewer-frame">
+<div id="country-viewer" class="viewer-content">
+<div class="viewer-placeholder">Seleziona uno Stato.</div>
+</div>
+</div>
 
-          const fitStage = doc.createElement("div");
-          fitStage.id = "fit-stage";
+</div>
+</section>
 
-          while (doc.body.firstChild) {
-            fitStage.appendChild(doc.body.firstChild);
-          }
+</div>
 
-          fitRoot.appendChild(fitStage);
-          doc.body.appendChild(fitRoot);
-        }
+</main>
+</div>
 
-        const fitRoot = doc.getElementById("fit-root");
-        const fitStage = doc.getElementById("fit-stage");
-        if (!fitRoot || !fitStage) return;
+<script>
 
-        // Reset temporaneo per misurare dimensioni reali
-        fitStage.style.transform = "scale(1)";
-        fitStage.style.width = "max-content";
-        fitStage.style.height = "max-content";
+const paesi=[
 
-        const availableWidth = fitRoot.clientWidth;
-        const availableHeight = fitRoot.clientHeight;
+{nome:"Austria",file:"Paese/austria.html",descrizione:"Qui puoi inserire la descrizione dell'Austria."},
+{nome:"Belgio",file:"Paese/belgio.html",descrizione:"Qui puoi inserire la descrizione del Belgio."},
+{nome:"Italia",file:"Paese/italia.html",descrizione:"Qui puoi inserire la descrizione dell'Italia."},
+{nome:"Francia",file:"Paese/francia.html",descrizione:"Qui puoi inserire la descrizione della Francia."},
+{nome:"Irlanda",file:"Paese/irlanda.html",descrizione:"Qui puoi inserire la descrizione dell'Irlanda."},
+{nome:"Lussemburgo",file:"Paese/lussemburgo.html",descrizione:"Qui puoi inserire la descrizione del Lussemburgo."},
+{nome:"Paesi Bassi",file:"Paese/paesi-bassi.html",descrizione:"Qui puoi inserire la descrizione dei Paesi Bassi."},
+{nome:"Svizzera",file:"Paese/svizzera.html",descrizione:"Qui puoi inserire la descrizione della Svizzera."},
+{nome:"Albania",file:"Paese/albania.html",descrizione:"Qui puoi inserire la descrizione dell'Albania."},
+{nome:"Bosnia ed Erzegovina",file:"Paese/bosnia-erzegovina.html",descrizione:"Qui puoi inserire la descrizione della Bosnia ed Erzegovina."},
+{nome:"Bulgaria",file:"Paese/bulgaria.html",descrizione:"Qui puoi inserire la descrizione della Bulgaria."},
+{nome:"Cipro",file:"Paese/cipro.html",descrizione:"Qui puoi inserire la descrizione di Cipro."},
+{nome:"Croazia",file:"Paese/croazia.html",descrizione:"Qui puoi inserire la descrizione della Croazia."},
+{nome:"Grecia",file:"Paese/grecia.html",descrizione:"Qui puoi inserire la descrizione della Grecia."},
+{nome:"Macedonia del Nord",file:"Paese/macedonia-del-nord.html",descrizione:"Qui puoi inserire la descrizione della Macedonia del Nord."},
+{nome:"Malta",file:"Paese/malta.html",descrizione:"Qui puoi inserire la descrizione di Malta."},
+{nome:"Montenegro",file:"Paese/montenegro.html",descrizione:"Qui puoi inserire la descrizione del Montenegro."},
+{nome:"Portogallo",file:"Paese/portogallo.html",descrizione:"Qui puoi inserire la descrizione del Portogallo."},
+{nome:"Serbia",file:"Paese/serbia.html",descrizione:"Qui puoi inserire la descrizione della Serbia."},
+{nome:"Slovenia",file:"Paese/slovenia.html",descrizione:"Qui puoi inserire la descrizione della Slovenia."},
+{nome:"Spagna",file:"Paese/spagna.html",descrizione:"Qui puoi inserire la descrizione della Spagna."},
+{nome:"Danimarca",file:"Paese/danimarca.html",descrizione:"Qui puoi inserire la descrizione della Danimarca."},
+{nome:"Estonia",file:"Paese/estonia.html",descrizione:"Qui puoi inserire la descrizione dell'Estonia."},
+{nome:"Finlandia",file:"Paese/finlandia.html",descrizione:"Qui puoi inserire la descrizione della Finlandia."},
+{nome:"Islanda",file:"Paese/islanda.html",descrizione:"Qui puoi inserire la descrizione dell'Islanda."},
+{nome:"Lettonia",file:"Paese/lettonia.html",descrizione:"Qui puoi inserire la descrizione della Lettonia."},
+{nome:"Lituania",file:"Paese/lituania.html",descrizione:"Qui puoi inserire la descrizione della Lituania."},
+{nome:"Norvegia",file:"Paese/norvegia.html",descrizione:"Qui puoi inserire la descrizione della Norvegia."},
+{nome:"Armenia",file:"Paese/armenia.html",descrizione:"Qui puoi inserire la descrizione dell'Armenia."},
+{nome:"Azerbaigian",file:"Paese/azerbaigian.html",descrizione:"Qui puoi inserire la descrizione dell'Azerbaigian."},
+{nome:"Bielorussia",file:"Paese/bielorussia.html",descrizione:"Qui puoi inserire la descrizione della Bielorussia."},
+{nome:"Georgia",file:"Paese/georgia.html",descrizione:"Qui puoi inserire la descrizione della Georgia."},
+{nome:"Germania",file:"Paese/germania.html",descrizione:"Qui puoi inserire la descrizione della Germania."},
+{nome:"Moldavia",file:"Paese/moldavia.html",descrizione:"Qui puoi inserire la descrizione della Moldavia."},
+{nome:"Polonia",file:"Paese/polonia.html",descrizione:"Qui puoi inserire la descrizione della Polonia."},
+{nome:"Regno Unito",file:"Paese/regno-unito.html",descrizione:"Qui puoi inserire la descrizione del Regno Unito."},
+{nome:"Repubblica Ceca",file:"Paese/repubblica-ceca.html",descrizione:"Qui puoi inserire la descrizione della Repubblica Ceca."},
+{nome:"Romania",file:"Paese/romania.html",descrizione:"Qui puoi inserire la descrizione della Romania."},
+{nome:"Russia",file:"Paese/russia.html",descrizione:"Qui puoi inserire la descrizione della Russia."},
+{nome:"Slovacchia",file:"Paese/slovacchia.html",descrizione:"Qui puoi inserire la descrizione della Slovacchia."},
+{nome:"Ucraina",file:"Paese/ucraina.html",descrizione:"Qui puoi inserire la descrizione dell'Ucraina."},
+{nome:"Ungheria",file:"Paese/ungheria.html",descrizione:"Qui puoi inserire la descrizione dell'Ungheria."},
+{nome:"Kazakistan",file:"Paese/kazakistan.html",descrizione:"Qui puoi inserire la descrizione del Kazakistan."},
+{nome:"Turchia",file:"Paese/turchia.html",descrizione:"Qui puoi inserire la descrizione della Turchia."}
 
-        const contentWidth = fitStage.scrollWidth;
-        const contentHeight = fitStage.scrollHeight;
+];
 
-        if (!contentWidth || !contentHeight || !availableWidth || !availableHeight) return;
+paesi.sort((a,b)=>a.nome.localeCompare(b.nome,"it"));
 
-        const scaleX = availableWidth / contentWidth;
-        const scaleY = availableHeight / contentHeight;
-        const scale = Math.min(scaleX, scaleY, 1);
+const menu=document.getElementById("menu");
+const title=document.getElementById("country-title");
+const description=document.getElementById("country-description");
+const viewer=document.getElementById("country-viewer");
 
-        fitStage.style.transform = `scale(${scale})`;
-      } catch (error) {
-        console.warn("Impossibile adattare il contenuto dell'iframe:", error);
-      }
-    }
+function showError(message){
+viewer.innerHTML=`<div class="viewer-error">${message}</div>`;
+}
 
-    function caricaPaese(paese, bottoneCliccato) {
-      title.textContent = paese.nome;
-      description.textContent = paese.descrizione;
-      frame.src = paese.file;
-      frame.title = "Visualizzatore " + paese.nome;
+function extractVisualFromHtml(htmlText){
 
-      document.querySelectorAll(".menu button").forEach(btn => {
-        btn.classList.remove("active");
-      });
+const parser=new DOMParser();
+const doc=parser.parseFromString(htmlText,"text/html");
 
-      if (bottoneCliccato) {
-        bottoneCliccato.classList.add("active");
-      }
-    }
+const img=doc.querySelector('img[src^="data:image"]');
+if(img){
+const newImg=document.createElement("img");
+newImg.src=img.getAttribute("src");
+return newImg;
+}
 
-    frame.addEventListener("load", () => {
-      adattaIframe();
+const svg=doc.querySelector("svg");
+if(svg){
+return document.importNode(svg,true);
+}
 
-      // Piccolo ritardo utile per SVG/immagini grandi
-      setTimeout(adattaIframe, 80);
-      setTimeout(adattaIframe, 250);
-    });
+return null;
+}
 
-    window.addEventListener("resize", () => {
-      adattaIframe();
-    });
+async function caricaImmagineDaFile(filePath){
 
-    paesi.forEach((paese, index) => {
-      const button = document.createElement("button");
-      button.textContent = paese.nome;
+try{
 
-      if (index === 0) {
-        button.classList.add("active");
-      }
+const response=await fetch(filePath);
+const htmlText=await response.text();
+const visual=extractVisualFromHtml(htmlText);
 
-      button.addEventListener("click", () => caricaPaese(paese, button));
-      menu.appendChild(button);
-    });
+if(!visual){
+showError("Immagine non trovata.");
+return;
+}
 
-    if (paesi.length > 0) {
-      title.textContent = paesi[0].nome;
-      description.textContent = paesi[0].descrizione;
-      frame.src = paesi[0].file;
-      frame.title = "Visualizzatore " + paesi[0].nome;
-    }
-  </script>
+viewer.innerHTML="";
+viewer.appendChild(visual);
+
+}catch(e){
+
+showError("Errore caricamento file");
+
+}
+
+}
+
+function caricaPaese(paese,button){
+
+title.textContent=paese.nome;
+description.textContent=paese.descrizione;
+
+caricaImmagineDaFile(paese.file);
+
+document.querySelectorAll(".menu button")
+.forEach(btn=>btn.classList.remove("active"));
+
+if(button){
+button.classList.add("active");
+}
+
+}
+
+paesi.forEach((paese,index)=>{
+
+const button=document.createElement("button");
+button.textContent=paese.nome;
+
+if(index===0){
+button.classList.add("active");
+}
+
+button.onclick=()=>caricaPaese(paese,button);
+
+menu.appendChild(button);
+
+});
+
+if(paesi.length>0){
+title.textContent=paesi[0].nome;
+description.textContent=paesi[0].descrizione;
+caricaImmagineDaFile(paesi[0].file);
+}
+
+</script>
+
 </body>
 </html>
